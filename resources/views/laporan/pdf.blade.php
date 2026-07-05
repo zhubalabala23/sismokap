@@ -287,11 +287,11 @@
                 </tr>
                 <tr>
                     <td class="info-label">Lokasi</td>
-                    <td class="info-value">: {{ $proyek->lokasi->nama_lokasi ?? '-' }}</td>
+                    <td class="info-value">: {{ $proyek->lokasi?->nama_lokasi ?? '-' }}</td>
                 </tr>
                 <tr>
                     <td class="info-label">Kontraktor</td>
-                    <td class="info-value">: {{ $proyek->kontraktor->nama_kontraktor ?? '-' }}</td>
+                    <td class="info-value">: {{ $proyek->kontraktor?->nama_kontraktor ?? '-' }}</td>
                 </tr>
                 <tr>
                     <td class="info-label">Periode</td>

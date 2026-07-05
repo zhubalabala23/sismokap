@@ -1,151 +1,90 @@
 @extends('layouts.admin')
 
-@section('title', 'Timeline Progress - SISMOKAP')
-@section('page_title', 'Timeline Riwayat Progress')
-
-@section('styles')
-<style>
-    /* Timeline styling */
-    .timeline {
-        position: relative;
-        padding-left: 3rem;
-        margin-bottom: 2rem;
-    }
-    
-    .timeline::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 15px;
-        width: 2px;
-        background: #e2e8f0;
-    }
-    
-    .timeline-item {
-        position: relative;
-        margin-bottom: 2.5rem;
-    }
-    
-    .timeline-marker {
-        position: absolute;
-        left: -33px;
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        background: #ffffff;
-        border: 4px solid #2d60ff;
-        z-index: 1;
-        transition: all 0.2s ease-in-out;
-    }
-
-    .timeline-marker.Harian {
-        border-color: #0d6efd;
-    }
-
-    .timeline-marker.Mingguan {
-        border-color: #fd7e14;
-    }
-    
-    .timeline-item:hover .timeline-marker {
-        transform: scale(1.3);
-    }
-    
-    .timeline-content {
-        background: #ffffff;
-        border-radius: 12px;
-        padding: 18px 24px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
-        border: 1px solid rgba(0, 0, 0, 0.04);
-    }
-</style>
-@endsection
+@section('title', 'Timeline Proyek - SISMOKAP')
+@section('page_title', 'Timeline Pelaksanaan Proyek')
 
 @section('content')
-<div class="row g-4">
-    <!-- Project Selector Card -->
-    <div class="col-12">
-        <div class="card p-4 bg-white">
-            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
-                <div>
-                    <h5 class="fw-bold text-dark mb-1">Pilih Proyek untuk Timeline</h5>
-                    <p class="text-muted mb-0 fs-7">Tampilkan riwayat log progress harian dan mingguan secara vertikal</p>
+<div class="card p-4 bg-white">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 border-bottom pb-3 mb-4">
+        <div>
+            <h5 class="fw-bold text-dark mb-1">Timeline & Jadwal Pelaksanaan Proyek</h5>
+            <p class="text-muted mb-0 fs-7">Membandingkan jadwal rencana dan status realisasi seluruh proyek</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <!-- Search Box -->
+            <form action="{{ route('monitoring.timeline') }}" method="GET" class="d-flex gap-2 align-items-center m-0">
+                <div class="input-group" style="max-width: 250px;">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="search" class="form-control border-start-0 fs-7" placeholder="Cari kode, nama, tahapan..." value="{{ $search ?? '' }}">
                 </div>
-                
-                <form action="{{ route('monitoring.timeline') }}" method="GET" class="d-flex gap-2 align-items-center m-0">
-                    <select name="proyek_id" class="form-select fs-7" style="min-width: 250px;" onchange="this.form.submit()">
-                        <option value="">Pilih Proyek...</option>
-                        @foreach($proyeks as $proyek)
-                            <option value="{{ $proyek->id }}" {{ $proyekId == $proyek->id ? 'selected' : '' }}>{{ $proyek->nama_proyek }}</option>
-                        @endforeach
-                    </select>
-                </form>
-            </div>
+                @if($search ?? false)
+                    <a href="{{ route('monitoring.timeline') }}" class="btn btn-outline-secondary btn-sm px-3 fs-7 py-2">Reset</a>
+                @endif
+            </form>
+            <button type="button" onclick="window.print()" class="btn btn-outline-secondary rounded-3 fs-7 py-2 px-3">
+                <i class="bi bi-printer-fill me-1"></i> Cetak Halaman
+            </button>
         </div>
     </div>
 
-    <!-- Timeline Render -->
-    <div class="col-12">
-        @if($selectedProyek)
-            <div class="card p-4 bg-white">
-                <div class="border-bottom pb-3 mb-4 d-flex justify-content-between align-items-center">
-                    <div>
-                        <h4 class="fw-bold text-dark mb-1">{{ $selectedProyek->nama_proyek }}</h4>
-                        <p class="text-muted mb-0 fs-7">
-                            <i class="bi bi-tag-fill me-1"></i> Kode: <strong class="text-primary">{{ $selectedProyek->kode_proyek }}</strong> | 
-                            <i class="bi bi-geo-alt-fill me-1"></i> Lokasi: <strong>{{ $selectedProyek->lokasi->nama_lokasi ?? '-' }}</strong> | 
-                            <i class="bi bi-building-fill me-1"></i> Kontraktor: <strong>{{ $selectedProyek->kontraktor->nama_kontraktor ?? '-' }}</strong>
-                        </p>
-                    </div>
-                    <div>
-                        @if($selectedProyek->status === 'berjalan')
-                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 fs-7">BERJALAN</span>
-                        @elseif($selectedProyek->status === 'selesai')
-                            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fs-7">SELESAI</span>
-                        @else
-                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 fs-7">TERLAMBAT</span>
-                        @endif
-                    </div>
-                </div>
-
-                @if($timelineData->count() > 0)
-                    <div class="timeline mt-3">
-                        @foreach($timelineData as $item)
-                            <div class="timeline-item">
-                                <div class="timeline-marker {{ $item['tipe'] }}"></div>
-                                <div class="timeline-content">
-                                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class="badge {{ $item['badge_color'] }} px-2 py-1 fs-8 text-uppercase">{{ $item['tipe'] }}</span>
-                                            <h6 class="mb-0 fw-bold text-dark fs-7">{{ $item['tanggal_formatted'] }}</h6>
-                                        </div>
-                                        <div class="fs-6 fw-extrabold text-primary">{{ number_format($item['persentase'], 2) }}%</div>
-                                    </div>
-                                    
-                                    <p class="text-dark fs-7 mb-2">{{ $item['keterangan'] ?? 'Tidak ada catatan progress.' }}</p>
-                                    
-                                    <div class="d-flex align-items-center justify-content-between border-top pt-2 mt-2 fs-8 text-muted">
-                                        <span><i class="bi bi-person-fill me-1"></i> Diinput oleh: <strong>{{ $item['input_by'] }}</strong></span>
-                                        <span>Target Akhir Proyek: <strong>{{ number_format($selectedProyek->target_progress, 2) }}%</strong></span>
-                                    </div>
-                                </div>
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-light">
+                <tr class="text-muted fs-7">
+                    <th scope="col" class="text-center" style="width: 50px;">NO</th>
+                    <th scope="col">KODE & NAMA PROYEK</th>
+                    <th scope="col">TAHAPAN PEKERJAAN</th>
+                    <th scope="col" style="width: 130px;">TANGGAL MULAI</th>
+                    <th scope="col" style="width: 130px;">TANGGAL SELESAI</th>
+                    <th scope="col" style="width: 180px;">STATUS PEKERJAAN</th>
+                    <th scope="col">KETERANGAN</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($proyeks as $index => $proyek)
+                    <tr>
+                        <td class="text-center fs-7">{{ $index + 1 }}</td>
+                        <td>
+                            <div class="fs-7 fw-bold text-primary">{{ $proyek->kode_proyek }}</div>
+                            <div class="fs-7 fw-semibold text-dark">{{ $proyek->nama_proyek }}</div>
+                            <div class="fs-8 text-muted mt-1">
+                                <i class="bi bi-geo-alt-fill me-1"></i>{{ $proyek->lokasi?->nama_lokasi ?? '-' }}
                             </div>
-                        @endforeach
-                    </div>
-                @else
-                    <div class="text-center py-5">
-                        <i class="bi bi-calendar-x fs-1 text-muted mb-3 d-block"></i>
-                        <p class="text-muted fs-6 mb-0">Belum ada riwayat progress harian atau mingguan yang tercatat untuk proyek ini.</p>
-                    </div>
-                @endif
-            </div>
-        @else
-            <div class="card p-5 bg-white text-center">
-                <i class="bi bi-folder-symlink fs-1 text-muted mb-3"></i>
-                <h5>Silakan Pilih Proyek Terlebih Dahulu</h5>
-                <p class="text-muted fs-7 mb-0">Pilih proyek pada dropdown di atas untuk melihat timeline riwayat progress secara rinci.</p>
-            </div>
-        @endif
+                        </td>
+                        <td class="fs-7 fw-semibold text-dark">
+                            {{ $proyek->tahapan_pekerjaan ?? 'Belum Ditentukan' }}
+                        </td>
+                        <td class="fs-7 text-dark text-nowrap">
+                            <i class="bi bi-calendar-event text-primary me-1"></i>
+                            {{ $proyek->tanggal_mulai ? $proyek->tanggal_mulai->format('d M Y') : '-' }}
+                        </td>
+                        <td class="fs-7 text-dark text-nowrap">
+                            <i class="bi bi-calendar-check text-success me-1"></i>
+                            {{ $proyek->tanggal_selesai ? $proyek->tanggal_selesai->format('d M Y') : '-' }}
+                        </td>
+                        <td>
+                            @if($proyek->status === 'perencanaan')
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1 fs-8">PERENCANAAN</span>
+                            @elseif($proyek->status === 'berjalan')
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 fs-8">BERJALAN</span>
+                            @elseif($proyek->status === 'selesai')
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fs-8">SELESAI PENGERJAAN</span>
+                            @else
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 fs-8">TERLAMBAT</span>
+                            @endif
+                        </td>
+                        <td class="fs-7 text-muted">
+                            {{ $proyek->keterangan ?? '-' }}
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4 fs-7">Tidak ada data proyek ditemukan.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
 @endsection

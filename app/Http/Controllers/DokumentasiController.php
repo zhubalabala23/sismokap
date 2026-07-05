@@ -33,17 +33,25 @@ class DokumentasiController extends Controller
     public function store(StoreDokumentasiRequest $request)
     {
         if ($request->hasFile('file')) {
-            $path = $request->file('file')->store('dokumentasi', 'public');
+            $disk = config('filesystems.default');
+            $path = $request->file('file')->store('dokumentasi', $disk);
+
+            $videoPath = null;
+            if ($request->hasFile('video')) {
+                $videoPath = $request->file('video')->store('dokumentasi', $disk);
+            }
 
             Dokumentasi::create([
                 'proyek_id' => $request->proyek_id,
                 'file_path' => $path,
-                'tanggal_upload' => now()->format('Y-m-d'),
+                'video_path' => $videoPath,
+                'jenis_dokumentasi' => $request->jenis_dokumentasi,
+                'tanggal_upload' => $request->tanggal_upload,
                 'keterangan' => $request->keterangan,
             ]);
 
             return redirect()->route('dokumentasi.index')
-                ->with('success', 'Foto dokumentasi berhasil diunggah.');
+                ->with('success', 'Dokumentasi berhasil diunggah.');
         }
 
         return redirect()->route('dokumentasi.index')
@@ -53,10 +61,16 @@ class DokumentasiController extends Controller
     public function destroy($id)
     {
         $dokumentasi = Dokumentasi::findOrFail($id);
+        $disk = config('filesystems.default');
 
-        // Delete from storage
-        if ($dokumentasi->file_path && Storage::disk('public')->exists($dokumentasi->file_path)) {
-            Storage::disk('public')->delete($dokumentasi->file_path);
+        // Delete photo from storage
+        if ($dokumentasi->file_path && Storage::disk($disk)->exists($dokumentasi->file_path)) {
+            Storage::disk($disk)->delete($dokumentasi->file_path);
+        }
+
+        // Delete video from storage
+        if ($dokumentasi->video_path && Storage::disk($disk)->exists($dokumentasi->video_path)) {
+            Storage::disk($disk)->delete($dokumentasi->video_path);
         }
 
         $dokumentasi->delete();

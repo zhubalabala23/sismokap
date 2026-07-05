@@ -22,7 +22,7 @@ class UpdateUserRequest extends FormRequest
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $userId,
             'password' => 'nullable|string|min:8|confirmed',
-            'role' => 'required|in:admin,operator,pimpinan',
+            'role' => 'required|in:admin,operator,pengawas,pimpinan',
         ];
     }
 

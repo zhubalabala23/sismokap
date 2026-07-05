@@ -5,82 +5,85 @@
 
 @section('content')
 <div class="card p-4 bg-white">
-    <!-- Header/Filter -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 border-bottom pb-3 mb-4">
-        <form action="{{ route('laporan.harian') }}" method="GET" class="row g-2 align-items-end m-0 w-100" style="max-width: 600px;">
-            <div class="col-12 col-sm-6">
-                <label for="tanggal" class="form-label fs-8 fw-semibold text-muted mb-1 text-uppercase">Pilih Tanggal Laporan</label>
-                <input type="date" name="tanggal" id="tanggal" class="form-control fs-7" value="{{ $tanggal }}">
+    <!-- Filter & Search Form -->
+    <div class="border-bottom pb-3 mb-4">
+        <h5 class="fw-bold text-dark mb-3">Filter & Cari Laporan Progress Harian</h5>
+        <form action="{{ route('laporan.harian') }}" method="GET" class="row g-3 align-items-end">
+            <!-- Project Dropdown (Optional for filtering specific project) -->
+            <div class="col-12 col-md-3">
+                <label for="proyek_id" class="form-label fs-8 fw-semibold text-muted mb-1 text-uppercase">Pilih Proyek (Opsional)</label>
+                <select name="proyek_id" id="proyek_id" class="form-select fs-7">
+                    <option value="">-- Semua Proyek --</option>
+                    @foreach($allProyeks as $proy)
+                        <option value="{{ $proy->id }}" {{ $proyekId == $proy->id ? 'selected' : '' }}>
+                            {{ $proy->nama_proyek }}
+                        </option>
+                    @endforeach
+                </select>
             </div>
-            <div class="col-12 col-sm-6 d-flex gap-2">
-                <button type="submit" class="btn btn-primary btn-sm px-4 py-2 fs-7"><i class="bi bi-funnel-fill me-1"></i> Filter</button>
-                <a href="{{ route('laporan.harian') }}" class="btn btn-outline-secondary btn-sm px-3 py-2 fs-7">Hari Ini</a>
+
+            <!-- Start Date -->
+            <div class="col-12 col-sm-6 col-md-3">
+                <label for="start_date" class="form-label fs-8 fw-semibold text-muted mb-1 text-uppercase">Tanggal Awal</label>
+                <input type="date" name="start_date" id="start_date" class="form-control fs-7" value="{{ $startDate }}">
+            </div>
+
+            <!-- End Date -->
+            <div class="col-12 col-sm-6 col-md-3">
+                <label for="end_date" class="form-label fs-8 fw-semibold text-muted mb-1 text-uppercase">Tanggal Akhir</label>
+                <input type="date" name="end_date" id="end_date" class="form-control fs-7" value="{{ $endDate }}">
+            </div>
+
+            <!-- Buttons -->
+            <div class="col-12 col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100 py-2 fs-7">
+                    <i class="bi bi-funnel-fill me-1"></i> Saring
+                </button>
+                @if($proyekId || $startDate || $endDate)
+                    <a href="{{ route('laporan.harian') }}" class="btn btn-outline-secondary py-2 px-3 fs-7">Reset</a>
+                @endif
+                <a href="{{ route('laporan.export-harian-pdf', ['proyek_id' => $proyekId, 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="btn btn-danger py-2 px-3 fs-7 text-nowrap rounded-3">
+                    <i class="bi bi-file-earmark-pdf-fill me-1"></i> Cetak PDF
+                </a>
             </div>
         </form>
-
-        <button type="button" onclick="window.print()" class="btn btn-outline-secondary rounded-3 fs-7 py-2 px-3 align-self-md-end">
-            <i class="bi bi-printer-fill me-1"></i> Cetak Halaman
-        </button>
-    </div>
-
-    <!-- Title inside printable area -->
-    <div class="text-center mb-4 d-none d-print-block">
-        <h3 class="fw-bold">LAPORAN PROGRESS HARIAN PROYEK</h3>
-        <p class="text-muted">Tanggal: {{ date('d F Y', strtotime($tanggal)) }}</p>
     </div>
 
     <!-- Table -->
     <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle">
+        <table class="table table-hover align-middle">
             <thead class="table-light">
-                <tr class="text-muted fs-7">
-                    <th scope="col" style="width: 120px;">KODE PROYEK</th>
-                    <th scope="col">NAMA PROYEK</th>
-                    <th scope="col">LOKASI</th>
-                    <th scope="col">KONTRAKTOR</th>
-                    <th scope="col" style="width: 100px;">PROGRESS</th>
-                    <th scope="col" style="width: 100px;">TARGET</th>
-                    <th scope="col" style="width: 100px;">SELISIH</th>
-                    <th scope="col">STATUS</th>
-                    <th scope="col">CATATAN HARIAN</th>
-                    <th scope="col" class="text-center d-print-none" style="width: 120px;">AKSI</th>
+                <tr class="text-muted fs-7 text-nowrap">
+                    <th scope="col">TANGGAL PELAKSANAAN</th>
+                    <th scope="col">PROYEK</th>
+                    <th scope="col">URAIAN PEKERJAAN</th>
+                    <th scope="col">VOLUME</th>
+                    <th scope="col">BOBOT (AKUMULATIF)</th>
+                    <th scope="col">PROGRES HARIAN</th>
+                    <th scope="col">KENDALA</th>
+                    <th scope="col">SOLUSI</th>
+                    <th scope="col">PETUGAS INPUT</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($reportData as $item)
-                    <tr>
-                        <td class="fs-7 fw-bold text-primary">{{ $item['kode_proyek'] }}</td>
-                        <td class="fs-7 fw-semibold text-dark">{{ $item['nama_proyek'] }}</td>
-                        <td class="fs-7 text-dark">{{ $item['lokasi'] }}</td>
-                        <td class="fs-7 text-muted">{{ $item['kontraktor'] }}</td>
-                        <td class="fs-7 fw-bold text-dark text-end">{{ number_format($item['actual'], 2) }}%</td>
-                        <td class="fs-7 text-dark fw-semibold text-end">{{ number_format($item['target'], 2) }}%</td>
-                        <td class="fs-7 @if($item['selisih'] > 0) text-danger @else text-success @endif fw-semibold text-end">
-                            {{ $item['selisih'] > 0 ? '+' : '' }}{{ number_format($item['selisih'], 2) }}%
+                @forelse($reportData as $entry)
+                    <tr class="text-nowrap fs-7">
+                        <td class="fw-semibold text-dark">{{ $entry->tanggal_pelaksanaan->format('d M Y') }}</td>
+                        <td class="fw-semibold text-primary">
+                            {{ $entry->proyek->nama_proyek }}
+                            <div class="text-muted fs-8 fw-normal">[{{ $entry->proyek->kode_proyek }}]</div>
                         </td>
-                        <td>
-                            @if($item['status'] === 'berjalan')
-                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 fs-8">BERJALAN</span>
-                            @elseif($item['status'] === 'selesai')
-                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fs-8">SELESAI</span>
-                            @else
-                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 fs-8">TERLAMBAT</span>
-                            @endif
-                        </td>
-                        <td class="fs-7 text-muted">{{ $item['keterangan'] }}</td>
-                        <td class="text-center d-print-none">
-                            @if(auth()->user()->role === 'admin')
-                                <a href="{{ route('laporan.export-pdf', $item['id']) }}" class="btn btn-sm btn-danger fs-8 px-2 py-1">
-                                    <i class="bi bi-file-earmark-pdf-fill"></i> Cetak PDF
-                                </a>
-                            @else
-                                <span class="text-muted fs-8">-</span>
-                            @endif
-                        </td>
+                        <td class="text-dark text-wrap" style="max-width: 250px;">{{ $entry->uraian_pekerjaan ?? '-' }}</td>
+                        <td class="text-dark">{{ $entry->volume_pekerjaan ?? '-' }}</td>
+                        <td class="fw-bold text-dark">{{ number_format($entry->persentase, 2) }}%</td>
+                        <td class="fw-bold text-success">{{ number_format($entry->progres_harian, 2) }}%</td>
+                        <td class="text-muted text-wrap" style="max-width: 150px;">{{ $entry->kendala ?? '-' }}</td>
+                        <td class="text-muted text-wrap" style="max-width: 150px;">{{ $entry->solusi ?? '-' }}</td>
+                        <td class="text-dark">{{ $entry->user->name ?? '-' }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="10" class="text-center text-muted py-4 fs-7">Tidak ada data progress proyek pada tanggal ini.</td>
+                        <td colspan="9" class="text-center text-muted py-4 fs-7">Tidak ada data progress harian ditemukan.</td>
                     </tr>
                 @endforelse
             </tbody>

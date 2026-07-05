@@ -22,8 +22,10 @@ class Setting extends Model
      */
     public static function getValue(string $key, $default = null)
     {
-        $setting = self::where('key', $key)->first();
-        return $setting ? $setting->value : $default;
+        return \Illuminate\Support\Facades\Cache::remember("setting_{$key}", 86400, function () use ($key, $default) {
+            $setting = self::where('key', $key)->first();
+            return $setting ? $setting->value : $default;
+        });
     }
 
     /**
@@ -35,9 +37,34 @@ class Setting extends Model
      */
     public static function setValue(string $key, $value)
     {
+        \Illuminate\Support\Facades\Cache::forget("setting_{$key}");
         return self::updateOrCreate(
             ['key' => $key],
             ['value' => $value]
         );
+    }
+
+    /**
+     * Get the logo URL.
+     *
+     * @return string|null
+     */
+    public static function getLogoUrl()
+    {
+        $logo = self::getValue('logo');
+        if (!$logo) {
+            return null;
+        }
+
+        if (filter_var($logo, FILTER_VALIDATE_URL)) {
+            return $logo;
+        }
+
+        $disk = config('filesystems.default');
+        if ($disk === 'supabase') {
+            return \Illuminate\Support\Facades\Storage::disk('supabase')->url($logo);
+        }
+
+        return asset('storage/' . $logo);
     }
 }

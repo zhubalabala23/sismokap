@@ -47,12 +47,13 @@ class SettingController extends Controller
         if ($request->hasFile('logo')) {
             // Delete old logo if exists
             $oldLogo = Setting::getValue('logo');
-            if ($oldLogo && Storage::disk('public')->exists($oldLogo)) {
-                Storage::disk('public')->delete($oldLogo);
+            $disk = config('filesystems.default');
+            if ($oldLogo && Storage::disk($disk)->exists($oldLogo)) {
+                Storage::disk($disk)->delete($oldLogo);
             }
 
             // Upload new logo
-            $path = $request->file('logo')->store('settings', 'public');
+            $path = $request->file('logo')->store('settings', $disk);
             Setting::setValue('logo', $path);
         }
 
@@ -73,52 +74,87 @@ class SettingController extends Controller
      */
     public function runBackup()
     {
-        $host = config('database.connections.mysql.host');
-        $username = config('database.connections.mysql.username');
-        $password = config('database.connections.mysql.password');
-        $database = config('database.connections.mysql.database');
+        $connection = config('database.default');
+        $databaseName = config("database.connections.{$connection}.database", 'postgres');
+        $filename = 'backup_' . $databaseName . '_' . date('Ymd_His') . '.sql';
+        $disk = config('filesystems.default');
+        $filePath = 'backups/' . $filename;
 
-        $filename = 'backup_' . $database . '_' . date('Ymd_His') . '.sql';
-        $directory = storage_path('app/backups');
+        try {
+            if ($connection === 'pgsql') {
+                $tables = \Illuminate\Support\Facades\DB::select("
+                    SELECT table_name 
+                    FROM information_schema.tables 
+                    WHERE table_schema = 'public' 
+                      AND table_type = 'BASE TABLE'
+                ");
+                
+                $sqlDump = "-- SISMOKAP PostgreSQL Database Backup\n";
+                $sqlDump .= "-- Generated on " . date('Y-m-d H:i:s') . "\n\n";
+                $sqlDump .= "SET statement_timeout = 0;\n";
+                $sqlDump .= "SET lock_timeout = 0;\n";
+                $sqlDump .= "SET client_encoding = 'UTF8';\n";
+                $sqlDump .= "SET standard_conforming_strings = on;\n";
+                $sqlDump .= "SET check_function_bodies = false;\n";
+                $sqlDump .= "SET xmloption = content;\n";
+                $sqlDump .= "SET client_min_messages = warning;\n\n";
+                $sqlDump .= "SET CONSTRAINTS ALL DEFERRED;\n\n";
 
-        if (!File::exists($directory)) {
-            File::makeDirectory($directory, 0755, true, true);
+                $tableList = array_map(function($t) { return $t->table_name; }, $tables);
+
+                foreach ($tableList as $table) {
+                    if ($table === 'spatial_ref_sys') {
+                        continue;
+                    }
+
+                    $sqlDump .= "--\n-- Data for Name: $table; Type: TABLE DATA\n--\n\n";
+                    $sqlDump .= "TRUNCATE TABLE \"$table\" CASCADE;\n\n";
+
+                    $rows = \Illuminate\Support\Facades\DB::table($table)->get();
+                    if ($rows->count() > 0) {
+                        foreach ($rows as $row) {
+                            $rowArray = (array)$row;
+                            $columns = array_keys($rowArray);
+                            
+                            $escapedColumns = array_map(function($col) {
+                                return "\"$col\"";
+                            }, $columns);
+
+                            $escapedValues = array_map(function($val) {
+                                if ($val === null) {
+                                    return 'NULL';
+                                }
+                                if (is_bool($val)) {
+                                    return $val ? 'true' : 'false';
+                                }
+                                if (is_numeric($val) && !is_string($val)) {
+                                    return $val;
+                                }
+                                return "'" . str_replace("'", "''", $val) . "'";
+                            }, array_values($rowArray));
+
+                            $sqlDump .= "INSERT INTO \"$table\" (" . implode(', ', $escapedColumns) . ") VALUES (" . implode(', ', $escapedValues) . ");\n";
+                        }
+                        $sqlDump .= "\n";
+                    }
+                }
+
+                \Illuminate\Support\Facades\Storage::disk($disk)->put($filePath, $sqlDump);
+            } else {
+                return redirect()->back()->with('error', 'Hanya database PostgreSQL yang didukung untuk pencadangan cloud saat ini.');
+            }
+
+            if (\Illuminate\Support\Facades\Storage::disk($disk)->exists($filePath)) {
+                BackupLog::create([
+                    'filename' => $filename
+                ]);
+                return redirect()->back()->with('success', 'Backup database berhasil dibuat.');
+            }
+            
+            return redirect()->back()->with('error', 'Gagal membuat backup database.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal membuat backup database: ' . $e->getMessage());
         }
-
-        $path = $directory . DIRECTORY_SEPARATOR . $filename;
-
-        // Path to mysqldump executable in XAMPP
-        $mysqldumpPath = 'C:\\xampp\\mysql\\bin\\mysqldump.exe';
-
-        if (!File::exists($mysqldumpPath)) {
-            return redirect()->back()->with('error', 'Utilitas mysqldump tidak ditemukan di jalur default XAMPP.');
-        }
-
-        // Build command safely
-        $passwordOption = $password ? '--password=' . escapeshellarg($password) : '';
-        
-        $command = sprintf(
-            '%s --host=%s --user=%s %s %s > %s',
-            $mysqldumpPath,
-            escapeshellarg($host),
-            escapeshellarg($username),
-            $passwordOption,
-            escapeshellarg($database),
-            escapeshellarg($path)
-        );
-        
-        exec($command, $output, $returnVar);
-
-        if ($returnVar === 0 && File::exists($path) && File::size($path) > 0) {
-            // Save log
-            BackupLog::create([
-                'filename' => $filename
-            ]);
-
-            return redirect()->back()->with('success', 'Backup database berhasil dibuat.');
-        }
-
-        return redirect()->back()->with('error', 'Gagal membuat backup database. Pastikan MySQL berjalan dengan benar.');
     }
 
     /**
@@ -127,13 +163,14 @@ class SettingController extends Controller
     public function downloadBackup($id)
     {
         $backup = BackupLog::findOrFail($id);
-        $path = storage_path('app/backups/' . $backup->filename);
+        $disk = config('filesystems.default');
+        $filePath = 'backups/' . $backup->filename;
 
-        if (File::exists($path)) {
-            return Response::download($path);
+        if (\Illuminate\Support\Facades\Storage::disk($disk)->exists($filePath)) {
+            return \Illuminate\Support\Facades\Storage::disk($disk)->download($filePath);
         }
 
-        return redirect()->back()->with('error', 'Berkas backup tidak ditemukan di server.');
+        return redirect()->back()->with('error', 'Berkas backup tidak ditemukan di storage cloud.');
     }
 
     /**
@@ -142,10 +179,11 @@ class SettingController extends Controller
     public function deleteBackup($id)
     {
         $backup = BackupLog::findOrFail($id);
-        $path = storage_path('app/backups/' . $backup->filename);
+        $disk = config('filesystems.default');
+        $filePath = 'backups/' . $backup->filename;
 
-        if (File::exists($path)) {
-            File::delete($path);
+        if (\Illuminate\Support\Facades\Storage::disk($disk)->exists($filePath)) {
+            \Illuminate\Support\Facades\Storage::disk($disk)->delete($filePath);
         }
 
         $backup->delete();

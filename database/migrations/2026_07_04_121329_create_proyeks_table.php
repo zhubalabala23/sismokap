@@ -20,7 +20,7 @@ return new class extends Migration
             $table->date('tanggal_mulai');
             $table->date('tanggal_selesai');
             $table->decimal('target_progress', 5, 2)->default(100.00);
-            $table->enum('status', ['berjalan', 'selesai', 'terlambat'])->default('berjalan');
+            $table->string('status')->default('berjalan');
             $table->timestamps();
         });
     }

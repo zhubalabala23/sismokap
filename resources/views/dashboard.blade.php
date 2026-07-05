@@ -125,13 +125,21 @@
                     <h5 class="fw-bold mb-1" style="color: #1b2559;">Grafik Progress Proyek</h5>
                     <p class="text-muted mb-0 fs-7">Monitoring real-time pencapaian target fisik bulanan</p>
                 </div>
-                <div class="d-flex gap-2">
-                    <span class="badge bg-light text-dark border p-2">2024</span>
-                    <button class="btn btn-light btn-sm border"><i class="bi bi-funnel"></i></button>
+                <div>
+                    <form action="{{ route('dashboard') }}" method="GET" class="d-flex align-items-center gap-2 m-0">
+                        <label for="yearSelect" class="form-label fs-7 fw-semibold text-dark mb-0 text-nowrap">Tahun:</label>
+                        <select name="year" id="yearSelect" class="form-select form-select-sm fs-7 py-1 px-2 border" style="width: 100px;" onchange="this.form.submit()">
+                            @foreach($years as $yr)
+                                <option value="{{ $yr }}" {{ $yr == $selectedYear ? 'selected' : '' }}>{{ $yr }}</option>
+                            @endforeach
+                        </select>
+                    </form>
                 </div>
             </div>
-            <div style="position: relative; height: 320px;">
-                <canvas id="progressChart"></canvas>
+            <div style="overflow-x: auto; width: 100%;">
+                <div style="position: relative; height: 320px; min-width: 650px;">
+                    <canvas id="progressChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -171,7 +179,9 @@
                                     {{ $item['selisih'] > 0 ? '+' : '' }}{{ number_format($item['selisih'], 2) }}%
                                 </td>
                                 <td>
-                                    @if($item['status'] === 'berjalan')
+                                    @if($item['status'] === 'perencanaan')
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1 fs-8">PERENCANAAN</span>
+                                    @elseif($item['status'] === 'berjalan')
                                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 fs-8">BERJALAN</span>
                                     @elseif($item['status'] === 'selesai')
                                         <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fs-8">SELESAI</span>
@@ -225,7 +235,7 @@
                                 <td>
                                     <span class="fw-semibold text-dark fs-7">{{ $proyek->nama_proyek }}</span>
                                 </td>
-                                <td class="fs-7 text-muted">{{ $proyek->lokasi->nama_lokasi ?? '-' }}</td>
+                                <td class="fs-7 text-muted">{{ $proyek->lokasi?->nama_lokasi ?? '-' }}</td>
                                 <td>
                                     <div class="progress" style="height: 6px; width: 120px;">
                                         <div class="progress-bar rounded" role="progressbar" style="width: {{ $proyek->actual_progress }}%" aria-valuenow="{{ $proyek->actual_progress }}" aria-valuemin="0" aria-valuemax="100"></div>
@@ -233,7 +243,9 @@
                                     <span class="fs-8 text-muted mt-1 d-block">{{ number_format($proyek->actual_progress, 2) }}%</span>
                                 </td>
                                 <td>
-                                    @if($proyek->status === 'berjalan')
+                                    @if($proyek->status === 'perencanaan')
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1 fs-8">PERENCANAAN</span>
+                                    @elseif($proyek->status === 'berjalan')
                                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 fs-8">BERJALAN</span>
                                     @elseif($proyek->status === 'selesai')
                                         <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fs-8">SELESAI</span>
@@ -261,17 +273,43 @@
                 <a href="{{ route('dokumentasi.index') }}" class="text-primary text-decoration-none fs-7 fw-semibold">Lihat Semua</a>
             </div>
             <div class="row g-2">
-                @foreach($dokumentasiTerbaru as $foto)
+                @forelse($dokumentasiTerbaru as $foto)
                     <div class="col-6">
-                        <div class="card border p-1 rounded-3 h-100 hover-shadow" style="transition: all 0.2s;">
-                            <img src="{{ $foto['file_path'] }}" class="card-img-top rounded-3 object-fit-cover" style="height: 100px;" alt="Dokumentasi">
+                        <div class="card border p-1 rounded-3 h-100 hover-shadow position-relative" style="transition: all 0.2s;">
+                            <div class="position-relative">
+                                <img src="{{ $foto['file_path'] }}" class="card-img-top rounded-3 object-fit-cover" style="height: 100px;" alt="Dokumentasi">
+                                <div class="position-absolute top-0 start-0 m-1">
+                                    <span class="badge bg-primary text-white p-1 shadow-sm" style="font-size: 8px !important; line-height: 1;">{{ $foto['jenis_dokumentasi'] }}</span>
+                                </div>
+                                @if($foto['video_path'])
+                                    <div class="position-absolute top-0 end-0 m-1">
+                                        <span class="badge bg-danger text-white p-1 shadow-sm" style="font-size: 8px !important; line-height: 1;" title="Video Tersedia">
+                                            <i class="bi bi-play-btn-fill"></i> Video
+                                        </span>
+                                    </div>
+                                @endif
+                            </div>
                             <div class="card-body p-2">
-                                <h6 class="card-title fw-bold fs-8 mb-1 text-truncate" style="color: #1b2559;">{{ $foto['nama_proyek'] }}</h6>
-                                <p class="card-text fs-9 text-muted mb-0">{{ $foto['tanggal'] }}</p>
+                                <h6 class="card-title fw-bold fs-8 mb-1 text-truncate" style="color: #1b2559;" title="{{ $foto['nama_proyek'] }} - {{ $foto['jenis_dokumentasi'] }} ({{ number_format($foto['actual_progress'], 0) }}%)">
+                                    {{ $foto['nama_proyek'] }} - 
+                                    @if(strtolower($foto['jenis_dokumentasi']) === 'desain' || strtolower($foto['jenis_dokumentasi']) === 'perencanaan')
+                                        {{ $foto['jenis_dokumentasi'] }}
+                                    @else
+                                        Progres {{ number_format($foto['actual_progress'], 0) }}%
+                                    @endif
+                                </h6>
+                                <p class="card-text fs-9 text-muted mb-1">{{ $foto['tanggal'] }}</p>
+                                @if($foto['keterangan'])
+                                    <p class="card-text fs-9 text-muted text-truncate mb-0" title="{{ $foto['keterangan'] }}">{{ $foto['keterangan'] }}</p>
+                                @endif
                             </div>
                         </div>
                     </div>
-                @endforeach
+                @empty
+                    <div class="col-12 py-4 text-center text-muted fs-7">
+                        Belum ada dokumentasi terbaru.
+                    </div>
+                @endforelse
             </div>
         </div>
     </div>

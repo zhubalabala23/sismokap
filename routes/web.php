@@ -3,9 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::redirect('/', '/login');
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProyekController;
@@ -20,9 +18,6 @@ use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\SettingController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
 
 // Dashboard Route (Auth and verified)
 Route::get('/dashboard', [DashboardController::class, 'index'])
@@ -71,9 +66,13 @@ Route::middleware('auth')->group(function () {
     // 4. Laporan Module (Semua Role)
     Route::prefix('laporan')->name('laporan.')->group(function () {
         Route::get('harian', [LaporanController::class, 'harian'])->name('harian');
+        Route::get('export-harian-pdf', [LaporanController::class, 'exportHarianPdf'])->name('export-harian-pdf');
         Route::get('mingguan', [LaporanController::class, 'mingguan'])->name('mingguan');
+        Route::get('export-mingguan-pdf', [LaporanController::class, 'exportMingguanPdf'])->name('export-mingguan-pdf');
         Route::get('bulanan', [LaporanController::class, 'bulanan'])->name('bulanan');
+        Route::get('export-bulanan-pdf', [LaporanController::class, 'exportBulananPdf'])->name('export-bulanan-pdf');
         Route::get('rekap', [LaporanController::class, 'rekap'])->name('rekap');
+        Route::get('export-rekap-pdf', [LaporanController::class, 'exportRekapPdf'])->name('export-rekap-pdf');
         
         // Hanya Admin yang bisa mengekspor laporan
         Route::middleware('role:admin')->group(function () {

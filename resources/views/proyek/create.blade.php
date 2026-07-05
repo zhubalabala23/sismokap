@@ -25,7 +25,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('admin.proyek.store') }}" method="POST">
+            <form action="{{ route('admin.proyek.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="row g-3">
                     <!-- Kode Proyek -->
@@ -40,26 +40,39 @@
                         <input type="text" name="nama_proyek" id="nama_proyek" class="form-control fs-7 @error('nama_proyek') is-invalid @enderror" placeholder="Contoh: Gedung Serbaguna" value="{{ old('nama_proyek') }}" required>
                     </div>
 
-                    <!-- Lokasi -->
+                    <!-- Jenis Pekerjaan -->
                     <div class="col-12 col-md-6">
-                        <label for="lokasi_id" class="form-label fs-7 fw-semibold text-dark">Lokasi Proyek <span class="text-danger">*</span></label>
-                        <select name="lokasi_id" id="lokasi_id" class="form-select fs-7 @error('lokasi_id') is-invalid @enderror" required>
-                            <option value="">Pilih Lokasi</option>
-                            @foreach($lokasis as $lokasi)
-                                <option value="{{ $lokasi->id }}" {{ old('lokasi_id') == $lokasi->id ? 'selected' : '' }}>{{ $lokasi->nama_lokasi }}</option>
-                            @endforeach
-                        </select>
+                        <label for="jenis_pekerjaan" class="form-label fs-7 fw-semibold text-dark">Jenis Pekerjaan <span class="text-danger">*</span></label>
+                        <input type="text" name="jenis_pekerjaan" id="jenis_pekerjaan" class="form-control fs-7 @error('jenis_pekerjaan') is-invalid @enderror" placeholder="Contoh: Gedung, Gudang, Mess, dll." value="{{ old('jenis_pekerjaan') }}" required>
                     </div>
 
-                    <!-- Kontraktor -->
+                    <!-- Tahapan Pekerjaan -->
                     <div class="col-12 col-md-6">
-                        <label for="kontraktor_id" class="form-label fs-7 fw-semibold text-dark">Kontraktor Pelaksana <span class="text-danger">*</span></label>
+                        <label for="tahapan_pekerjaan" class="form-label fs-7 fw-semibold text-dark">Tahapan Pekerjaan <span class="text-danger">*</span></label>
+                        <input type="text" name="tahapan_pekerjaan" id="tahapan_pekerjaan" class="form-control fs-7 @error('tahapan_pekerjaan') is-invalid @enderror" placeholder="Contoh: Perencanaan, Pondasi, Struktur, Finishing, dll." value="{{ old('tahapan_pekerjaan') }}" required>
+                    </div>
+
+                    <!-- Lokasi -->
+                    <div class="col-12 col-md-6">
+                        <label for="lokasi_nama" class="form-label fs-7 fw-semibold text-dark">Lokasi Proyek <span class="text-danger">*</span></label>
+                        <input type="text" name="lokasi_nama" id="lokasi_nama" class="form-control fs-7 @error('lokasi_nama') is-invalid @enderror" placeholder="Contoh: Kampus Trilogi, Jakarta" value="{{ old('lokasi_nama') }}" required>
+                    </div>
+
+                    <!-- Satuan Pelaksana -->
+                    <div class="col-12 col-md-6">
+                        <label for="kontraktor_id" class="form-label fs-7 fw-semibold text-dark">Satuan Pelaksana <span class="text-danger">*</span></label>
                         <select name="kontraktor_id" id="kontraktor_id" class="form-select fs-7 @error('kontraktor_id') is-invalid @enderror" required>
-                            <option value="">Pilih Kontraktor</option>
+                            <option value="">Pilih Satuan Pelaksana</option>
                             @foreach($kontraktors as $kontraktor)
                                 <option value="{{ $kontraktor->id }}" {{ old('kontraktor_id') == $kontraktor->id ? 'selected' : '' }}>{{ $kontraktor->nama_kontraktor }}</option>
                             @endforeach
                         </select>
+                    </div>
+
+                    <!-- Nilai Kontrak -->
+                    <div class="col-12 col-md-6">
+                        <label for="nilai_kontrak" class="form-label fs-7 fw-semibold text-dark">Nilai Kontrak (Rupiah) <span class="text-danger">*</span></label>
+                        <input type="number" name="nilai_kontrak" id="nilai_kontrak" class="form-control fs-7 @error('nilai_kontrak') is-invalid @enderror" placeholder="Contoh: 1500000000" value="{{ old('nilai_kontrak') }}" required>
                     </div>
 
                     <!-- Tanggal Mulai -->
@@ -84,10 +97,27 @@
                     <div class="col-12 col-md-6">
                         <label for="status" class="form-label fs-7 fw-semibold text-dark">Status Awal <span class="text-danger">*</span></label>
                         <select name="status" id="status" class="form-select fs-7 @error('status') is-invalid @enderror" required>
+                            <option value="perencanaan" {{ old('status') == 'perencanaan' ? 'selected' : '' }}>Perencanaan</option>
                             <option value="berjalan" {{ old('status', 'berjalan') == 'berjalan' ? 'selected' : '' }}>Berjalan</option>
                             <option value="selesai" {{ old('status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
                             <option value="terlambat" {{ old('status') == 'terlambat' ? 'selected' : '' }}>Terlambat</option>
                         </select>
+                    </div>
+
+                    <!-- Keterangan -->
+                    <div class="col-12">
+                        <label for="keterangan" class="form-label fs-7 fw-semibold text-dark">Keterangan (Opsional)</label>
+                        <textarea name="keterangan" id="keterangan" rows="3" class="form-control fs-7 @error('keterangan') is-invalid @enderror" placeholder="Tulis keterangan tambahan mengenai proyek...">{{ old('keterangan') }}</textarea>
+                    </div>
+
+                    <!-- Foto Dokumentasi Awal -->
+                    <div class="col-12">
+                        <label for="foto" class="form-label fs-7 fw-semibold text-dark">Foto Dokumentasi Awal (Opsional)</label>
+                        <input type="file" name="foto" id="foto" class="form-control fs-7 @error('foto') is-invalid @enderror" accept="image/*">
+                        <small class="text-muted d-block mt-1 fs-8">Unggah foto kondisi awal proyek jika ada. Format: JPG, PNG, JPEG, WEBP (Maks. 2MB)</small>
+                        @error('foto')
+                            <div class="invalid-feedback fs-8 mt-1">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
 

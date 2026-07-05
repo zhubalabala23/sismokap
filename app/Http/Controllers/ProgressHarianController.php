@@ -13,7 +13,7 @@ class ProgressHarianController extends Controller
     {
         $proyekId = $request->input('proyek_id');
 
-        $query = ProgressHarian::with(['proyek', 'user'])->orderBy('tanggal', 'desc')->orderBy('id', 'desc');
+        $query = ProgressHarian::with(['proyek', 'user'])->orderBy('tanggal_pelaksanaan', 'desc')->orderBy('id', 'desc');
 
         if ($proyekId) {
             $query->where('proyek_id', $proyekId);
@@ -34,7 +34,7 @@ class ProgressHarianController extends Controller
 
         // Auto update status proyek
         $proyek = Proyek::findOrFail($request->proyek_id);
-        $proyek->updateStatusBasedOnProgress($request->persentase, $request->tanggal);
+        $proyek->updateStatusBasedOnProgress($request->persentase, $request->tanggal_pelaksanaan);
 
         return redirect()->route('progress-harian.index')
             ->with('success', 'Progress harian berhasil ditambahkan dan status proyek diperbarui.');

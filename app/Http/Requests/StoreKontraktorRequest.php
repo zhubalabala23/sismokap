@@ -15,17 +15,24 @@ class StoreKontraktorRequest extends FormRequest
     {
         return [
             'nama_kontraktor' => 'required|string|max:255',
-            'kontak' => 'required|string|max:255',
+            'kontak' => 'nullable|string|max:255',
             'alamat' => 'required|string',
+            'proyek_id' => 'nullable|exists:proyek,id',
+            'nama_penanggung_jawab' => 'nullable|string|max:255',
+            'no_telp' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'no_kontrak' => 'nullable|string|max:255',
+            'masa_berlaku_kontrak' => 'nullable|date',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'nama_kontraktor.required' => 'Nama kontraktor wajib diisi.',
-            'kontak.required' => 'Kontak wajib diisi.',
-            'alamat.required' => 'Alamat kontraktor wajib diisi.',
+            'nama_kontraktor.required' => 'Nama perusahaan wajib diisi.',
+            'alamat.required' => 'Alamat perusahaan wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'masa_berlaku_kontrak.date' => 'Format tanggal masa berlaku kontrak tidak valid.',
         ];
     }
 }

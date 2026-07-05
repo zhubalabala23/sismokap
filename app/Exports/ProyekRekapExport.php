@@ -58,7 +58,7 @@ class ProyekRekapExport implements FromCollection, WithHeadings, WithMapping, Wi
             $this->rowNumber,
             $proyek->kode_proyek,
             $proyek->nama_proyek,
-            $proyek->lokasi->nama_lokasi ?? '-',
+            $proyek->lokasi?->nama_lokasi ?? '-',
             $proyek->kontraktor->nama_kontraktor ?? '-',
             $proyek->tanggal_mulai->format('d-m-Y'),
             $proyek->tanggal_selesai->format('d-m-Y'),

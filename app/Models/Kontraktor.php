@@ -18,10 +18,25 @@ class Kontraktor extends Model
         'nama_kontraktor',
         'kontak',
         'alamat',
+        'proyek_id',
+        'nama_penanggung_jawab',
+        'no_telp',
+        'email',
+        'no_kontrak',
+        'masa_berlaku_kontrak',
+    ];
+
+    protected $casts = [
+        'masa_berlaku_kontrak' => 'date',
     ];
 
     public function proyek(): HasMany
     {
         return $this->hasMany(Proyek::class, 'kontraktor_id');
+    }
+
+    public function proyekAssociated(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Proyek::class, 'proyek_id');
     }
 }

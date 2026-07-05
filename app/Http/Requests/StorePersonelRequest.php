@@ -16,7 +16,13 @@ class StorePersonelRequest extends FormRequest
         return [
             'nama' => 'required|string|max:255',
             'jabatan' => 'required|string|max:255',
-            'kontak' => 'required|string|max:255',
+            'nrp_nip' => 'nullable|string|max:255',
+            'pangkat_golongan' => 'nullable|string|max:255',
+            'no_hp' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'unit_kerja' => 'nullable|string|max:255',
+            'hak_akses' => 'nullable|string|max:255',
+            'password' => 'nullable|string|min:6',
         ];
     }
 
@@ -25,7 +31,7 @@ class StorePersonelRequest extends FormRequest
         return [
             'nama.required' => 'Nama personel wajib diisi.',
             'jabatan.required' => 'Jabatan wajib diisi.',
-            'kontak.required' => 'Kontak wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
         ];
     }
 }

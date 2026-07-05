@@ -25,12 +25,17 @@ class Proyek extends Model
         'tanggal_selesai',
         'target_progress',
         'status',
+        'jenis_pekerjaan',
+        'nilai_kontrak',
+        'keterangan',
+        'tahapan_pekerjaan',
     ];
 
     protected $casts = [
         'tanggal_mulai' => 'date',
         'tanggal_selesai' => 'date',
         'target_progress' => 'decimal:2',
+        'nilai_kontrak' => 'decimal:2',
     ];
 
     public function lokasi(): BelongsTo
@@ -62,14 +67,14 @@ class Proyek extends Model
     {
         if ($this->relationLoaded('progressHarian')) {
             $latestProgress = $this->progressHarian->sortByDesc(function ($ph) {
-                $tanggalStr = $ph->tanggal instanceof \Carbon\Carbon ? $ph->tanggal->format('Y-m-d') : (string)$ph->tanggal;
+                $tanggalStr = $ph->tanggal_pelaksanaan instanceof \Carbon\Carbon ? $ph->tanggal_pelaksanaan->format('Y-m-d') : (string)$ph->tanggal_pelaksanaan;
                 return $tanggalStr . '_' . str_pad($ph->id, 10, '0', STR_PAD_LEFT);
             })->first();
             return $latestProgress ? $latestProgress->persentase : 0;
         }
 
         // Ambil persentase dari progress harian terbaru berdasarkan tanggal
-        $latestProgress = $this->progressHarian()->orderBy('tanggal', 'desc')->orderBy('id', 'desc')->first();
+        $latestProgress = $this->progressHarian()->orderBy('tanggal_pelaksanaan', 'desc')->orderBy('id', 'desc')->first();
         return $latestProgress ? $latestProgress->persentase : 0;
     }
 

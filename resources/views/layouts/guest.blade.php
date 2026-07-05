@@ -176,12 +176,12 @@
         <div class="auth-container">
             <div class="text-center mb-4">
                 @php
-                    $logoSetting = \App\Models\Setting::getValue('logo');
+                    $logoUrl = \App\Models\Setting::getLogoUrl();
                     $namaInstansi = \App\Models\Setting::getValue('nama_instansi', 'SISMOKAP');
                 @endphp
                 <a href="/" class="auth-logo">
-                    @if($logoSetting)
-                        <img src="{{ asset('storage/' . $logoSetting) }}" alt="Logo" style="height: 48px; object-fit: contain; margin-right: 8px;">
+                    @if($logoUrl)
+                        <img src="{{ $logoUrl }}" alt="Logo" style="height: 48px; object-fit: contain; margin-right: 8px;">
                     @else
                         <i class="bi bi-shield-shaded"></i>
                     @endif

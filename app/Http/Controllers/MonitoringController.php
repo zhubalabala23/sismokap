@@ -12,98 +12,84 @@ class MonitoringController extends Controller
 {
     public function timeline(Request $request)
     {
-        $proyeks = Proyek::orderBy('nama_proyek')->get();
-        $proyekId = $request->input('proyek_id') ?: ($proyeks->first()?->id ?? null);
+        $search = $request->input('search');
         
-        $selectedProyek = null;
-        $timelineData = collect();
-
-        if ($proyekId) {
-            $selectedProyek = Proyek::findOrFail($proyekId);
-
-            $harian = $selectedProyek->progressHarian()->with('user')->get()->map(function ($item) {
-                return [
-                    'tanggal' => $item->tanggal,
-                    'tanggal_formatted' => $item->tanggal->format('d M Y'),
-                    'tipe' => 'Harian',
-                    'persentase' => $item->persentase,
-                    'keterangan' => $item->keterangan,
-                    'input_by' => $item->user->name ?? 'Unknown',
-                    'badge_color' => 'bg-info text-dark'
-                ];
+        $query = Proyek::with(['lokasi', 'kontraktor']);
+        
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_proyek', 'like', "%{$search}%")
+                  ->orWhere('kode_proyek', 'like', "%{$search}%")
+                  ->orWhere('tahapan_pekerjaan', 'like', "%{$search}%");
             });
-
-            $mingguan = $selectedProyek->progressMingguan()->get()->map(function ($item) {
-                $date = new \DateTime();
-                $date->setISODate($item->tahun, $item->minggu_ke);
-                $carbonDate = Carbon::instance($date);
-
-                return [
-                    'tanggal' => $carbonDate,
-                    'tanggal_formatted' => "Minggu ke-{$item->minggu_ke} ({$item->tahun})",
-                    'tipe' => 'Mingguan',
-                    'persentase' => $item->persentase,
-                    'keterangan' => $item->keterangan,
-                    'input_by' => 'Operator',
-                    'badge_color' => 'bg-warning text-dark'
-                ];
-            });
-
-            $timelineData = $harian->concat($mingguan)->sortByDesc('tanggal');
         }
-
-        return view('monitoring.timeline', compact('proyeks', 'proyekId', 'selectedProyek', 'timelineData'));
+        
+        $proyeks = $query->orderBy('nama_proyek')->get();
+        return view('monitoring.timeline', compact('proyeks', 'search'));
     }
 
     public function persentaseProgress(Request $request)
     {
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
-
-        $proyeks = Proyek::with(['lokasi', 'kontraktor', 'progressHarian'])->orderBy('nama_proyek')->get();
-
+        $search = $request->input('search');
+ 
+        $query = Proyek::with(['lokasi', 'kontraktor', 'progressHarian']);
+ 
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_proyek', 'like', "%{$search}%")
+                  ->orWhere('kode_proyek', 'like', "%{$search}%");
+            });
+        }
+ 
+        $proyeks = $query->orderBy('nama_proyek')->get();
+ 
         $progressData = $proyeks->map(function ($proyek) use ($startDate, $endDate) {
-            // Filter progress harian berdasarkan range tanggal jika disediakan (di memori)
             $harian = $proyek->progressHarian;
             
             if ($startDate) {
                 $harian = $harian->filter(function ($item) use ($startDate) {
-                    $itemTanggal = $item->tanggal instanceof \Carbon\Carbon ? $item->tanggal->format('Y-m-d') : (string)$item->tanggal;
+                    $itemTanggal = $item->tanggal_pelaksanaan instanceof \Carbon\Carbon ? $item->tanggal_pelaksanaan->format('Y-m-d') : (string)$item->tanggal_pelaksanaan;
                     return $itemTanggal >= $startDate;
                 });
             }
             if ($endDate) {
                 $harian = $harian->filter(function ($item) use ($endDate) {
-                    $itemTanggal = $item->tanggal instanceof \Carbon\Carbon ? $item->tanggal->format('Y-m-d') : (string)$item->tanggal;
+                    $itemTanggal = $item->tanggal_pelaksanaan instanceof \Carbon\Carbon ? $item->tanggal_pelaksanaan->format('Y-m-d') : (string)$item->tanggal_pelaksanaan;
                     return $itemTanggal <= $endDate;
                 });
             }
-
+ 
             $latestProgress = $harian
                 ->sortByDesc(function ($item) {
-                    $itemTanggal = $item->tanggal instanceof \Carbon\Carbon ? $item->tanggal->format('Y-m-d') : (string)$item->tanggal;
+                    $itemTanggal = $item->tanggal_pelaksanaan instanceof \Carbon\Carbon ? $item->tanggal_pelaksanaan->format('Y-m-d') : (string)$item->tanggal_pelaksanaan;
                     return $itemTanggal . '_' . str_pad($item->id, 10, '0', STR_PAD_LEFT);
                 })
                 ->first();
-
+ 
             $actual = $latestProgress ? $latestProgress->persentase : $proyek->actual_progress;
             
             $target = $proyek->target_progress;
-            $selisih = $target - $actual;
-
+            $selisih = $actual - $target;
+ 
             return [
                 'id' => $proyek->id,
                 'kode_proyek' => $proyek->kode_proyek,
                 'nama_proyek' => $proyek->nama_proyek,
-                'lokasi' => $proyek->lokasi->nama_lokasi ?? '-',
-                'kontraktor' => $proyek->kontraktor->nama_kontraktor ?? '-',
+                'lokasi' => $proyek->lokasi?->nama_lokasi ?? '-',
+                'kontraktor' => $proyek->kontraktor?->nama_kontraktor ?? '-',
                 'actual' => $actual,
                 'target' => $target,
                 'selisih' => $selisih,
                 'status' => $proyek->status,
             ];
         });
-
-        return view('monitoring.persentase_progress', compact('progressData', 'startDate', 'endDate'));
+ 
+        $chartLabels = $progressData->pluck('nama_proyek')->toArray();
+        $chartTargets = $progressData->pluck('target')->toArray();
+        $chartActuals = $progressData->pluck('actual')->toArray();
+ 
+        return view('monitoring.persentase_progress', compact('progressData', 'startDate', 'endDate', 'search', 'chartLabels', 'chartTargets', 'chartActuals'));
     }
 }

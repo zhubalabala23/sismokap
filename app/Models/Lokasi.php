@@ -17,10 +17,21 @@ class Lokasi extends Model
     protected $fillable = [
         'nama_lokasi',
         'alamat',
+        'proyek_id',
+        'kabupaten_kota',
+        'provinsi',
+        'latitude',
+        'longitude',
+        'keterangan_lokasi',
     ];
 
     public function proyek(): HasMany
     {
         return $this->hasMany(Proyek::class, 'lokasi_id');
+    }
+
+    public function proyekAssociated(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Proyek::class, 'proyek_id');
     }
 }

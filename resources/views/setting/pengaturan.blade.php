@@ -39,8 +39,11 @@
                     <div class="d-flex align-items-center gap-4 p-3 bg-light rounded-4">
                         <div class="logo-preview-box text-center bg-white rounded-3 border d-flex align-items-center justify-content-center" 
                              style="width: 100px; height: 100px; overflow: hidden;">
-                            @if($settings['logo'])
-                                <img src="{{ asset('storage/' . $settings['logo']) }}" alt="Logo" class="img-fluid" style="max-height: 90px; object-fit: contain;">
+                            @php
+                                $logoUrl = \App\Models\Setting::getLogoUrl();
+                            @endphp
+                            @if($logoUrl)
+                                <img src="{{ $logoUrl }}" alt="Logo" class="img-fluid" style="max-height: 90px; object-fit: contain;">
                             @else
                                 <i class="bi bi-image text-muted fs-2"></i>
                             @endif

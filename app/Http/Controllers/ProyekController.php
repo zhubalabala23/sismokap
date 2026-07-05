@@ -21,7 +21,11 @@ class ProyekController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('nama_proyek', 'like', "%{$search}%")
-                  ->orWhere('kode_proyek', 'like', "%{$search}%");
+                  ->orWhere('kode_proyek', 'like', "%{$search}%")
+                  ->orWhere('jenis_pekerjaan', 'like', "%{$search}%")
+                  ->orWhereHas('kontraktor', function ($qk) use ($search) {
+                      $qk->where('nama_kontraktor', 'like', "%{$search}%");
+                  });
             });
         }
 
@@ -43,7 +47,30 @@ class ProyekController extends Controller
 
     public function store(StoreProyekRequest $request)
     {
-        Proyek::create($request->validated());
+        $validatedData = $request->validated();
+        
+        $lokasiNama = $validatedData['lokasi_nama'];
+        $lokasi = Lokasi::firstOrCreate(
+            ['nama_lokasi' => $lokasiNama],
+            ['alamat' => $lokasiNama]
+        );
+        
+        $validatedData['lokasi_id'] = $lokasi->id;
+        unset($validatedData['lokasi_nama']);
+
+        $proyek = Proyek::create($validatedData);
+
+        if ($request->hasFile('foto')) {
+            $disk = config('filesystems.default');
+            $path = $request->file('foto')->store('dokumentasi', $disk);
+
+            \App\Models\Dokumentasi::create([
+                'proyek_id' => $proyek->id,
+                'file_path' => $path,
+                'tanggal_upload' => now()->format('Y-m-d'),
+                'keterangan' => 'Foto kondisi awal proyek ' . $proyek->nama_proyek,
+            ]);
+        }
 
         return redirect()->route('admin.proyek.index')
             ->with('success', 'Data proyek berhasil ditambahkan.');
@@ -63,7 +90,79 @@ class ProyekController extends Controller
 
     public function update(UpdateProyekRequest $request, Proyek $proyek)
     {
-        $proyek->update($request->validated());
+        $validatedData = $request->validated();
+        
+        $lokasiNama = $validatedData['lokasi_nama'];
+        
+        if ($proyek->lokasi_id) {
+            $currentLokasi = $proyek->lokasi;
+            if ($currentLokasi && $currentLokasi->nama_lokasi !== $lokasiNama) {
+                // Check if another location with the new name already exists
+                $existingLokasi = Lokasi::where('nama_lokasi', $lokasiNama)->first();
+                
+                if ($existingLokasi) {
+                    // Associate project with the existing location
+                    $validatedData['lokasi_id'] = $existingLokasi->id;
+                    $oldLokasi = $currentLokasi;
+                } else {
+                    // Update the existing location name directly
+                    $currentLokasi->update([
+                        'nama_lokasi' => $lokasiNama,
+                        'alamat' => $lokasiNama
+                    ]);
+                    $validatedData['lokasi_id'] = $currentLokasi->id;
+                }
+            } else {
+                $validatedData['lokasi_id'] = $proyek->lokasi_id;
+            }
+        } else {
+            // Find or create
+            $lokasi = Lokasi::firstOrCreate(
+                ['nama_lokasi' => $lokasiNama],
+                ['alamat' => $lokasiNama]
+            );
+            $validatedData['lokasi_id'] = $lokasi->id;
+        }
+        
+        unset($validatedData['lokasi_nama']);
+
+        $proyek->update($validatedData);
+
+        // Handle image upload / edit
+        if ($request->hasFile('foto')) {
+            $disk = config('filesystems.default');
+            $path = $request->file('foto')->store('dokumentasi', $disk);
+            
+            // Try to find the first/initial documentation for this project
+            $initialFoto = $proyek->dokumentasi()->first();
+            if ($initialFoto) {
+                // Delete old file from storage
+                if ($initialFoto->file_path && \Illuminate\Support\Facades\Storage::disk($disk)->exists($initialFoto->file_path)) {
+                    \Illuminate\Support\Facades\Storage::disk($disk)->delete($initialFoto->file_path);
+                }
+                // Update file path
+                $initialFoto->update([
+                    'file_path' => $path,
+                    'tanggal_upload' => now()->format('Y-m-d'),
+                ]);
+            } else {
+                // Create a new documentation record
+                \App\Models\Dokumentasi::create([
+                    'proyek_id' => $proyek->id,
+                    'file_path' => $path,
+                    'tanggal_upload' => now()->format('Y-m-d'),
+                    'keterangan' => 'Foto kondisi awal proyek ' . $proyek->nama_proyek,
+                ]);
+            }
+        }
+
+        // If the old location is now orphaned, delete it to keep database clean
+        if (isset($oldLokasi)) {
+            $otherProjectsCount = Proyek::where('lokasi_id', $oldLokasi->id)->count();
+            if ($otherProjectsCount === 0) {
+                $oldLokasi->delete();
+            }
+        }
 
         return redirect()->route('admin.proyek.index')
             ->with('success', 'Data proyek berhasil diperbarui.');
@@ -72,12 +171,22 @@ class ProyekController extends Controller
     public function destroy(Proyek $proyek)
     {
         try {
+            // Hapus berkas foto dari storage (lokal atau Supabase) sebelum menghapus data proyek
+            $disk = config('filesystems.default');
+            foreach ($proyek->dokumentasi as $foto) {
+                if ($foto->file_path && \Illuminate\Support\Facades\Storage::disk($disk)->exists($foto->file_path)) {
+                    \Illuminate\Support\Facades\Storage::disk($disk)->delete($foto->file_path);
+                }
+            }
+
+            // Hapus proyek dari database (CASCADE DELETE akan otomatis menghapus baris terkait di tabel lain)
             $proyek->delete();
+
             return redirect()->route('admin.proyek.index')
-                ->with('success', 'Data proyek berhasil dihapus.');
+                ->with('success', 'Data proyek beserta berkas dokumentasi terkait berhasil dihapus. Kode proyek kini dapat digunakan kembali.');
         } catch (\Exception $e) {
             return redirect()->route('admin.proyek.index')
-                ->with('error', 'Gagal menghapus proyek. Proyek ini mungkin masih memiliki data terkait.');
+                ->with('error', 'Gagal menghapus proyek: ' . $e->getMessage());
         }
     }
 }

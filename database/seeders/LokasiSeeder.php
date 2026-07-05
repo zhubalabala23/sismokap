@@ -17,15 +17,30 @@ class LokasiSeeder extends Seeder
         $lokasiMadiun = [
             [
                 'nama_lokasi' => 'Madiun Kota (Kartoharjo)',
-                'alamat' => 'Jl. Pahlawan No. 12, Kecamatan Kartoharjo, Kota Madiun, Jawa Timur'
+                'kabupaten_kota' => 'Kota Madiun',
+                'provinsi' => 'Jawa Timur',
+                'latitude' => -7.62980000,
+                'longitude' => 111.52430000,
+                'alamat' => 'Jl. Pahlawan No. 12, Kecamatan Kartoharjo, Kota Madiun, Jawa Timur',
+                'keterangan_lokasi' => 'Pusat pemerintahan Kota Madiun dekat Balai Kota.'
             ],
             [
                 'nama_lokasi' => 'Madiun Kabupaten (Jiwan)',
-                'alamat' => 'Jl. Raya Solo-Madiun No. 45, Kecamatan Jiwan, Kabupaten Madiun, Jawa Timur'
+                'kabupaten_kota' => 'Kabupaten Madiun',
+                'provinsi' => 'Jawa Timur',
+                'latitude' => -7.61890000,
+                'longitude' => 111.49820000,
+                'alamat' => 'Jl. Raya Solo-Madiun No. 45, Kecamatan Jiwan, Kabupaten Madiun, Jawa Timur',
+                'keterangan_lokasi' => 'Wilayah perbatasan antara Kota Madiun dan Magetan.'
             ],
             [
                 'nama_lokasi' => 'Madiun Kota (Taman)',
-                'alamat' => 'Jl. Cokroaminoto No. 88, Kecamatan Taman, Kota Madiun, Jawa Timur'
+                'kabupaten_kota' => 'Kota Madiun',
+                'provinsi' => 'Jawa Timur',
+                'latitude' => -7.64020000,
+                'longitude' => 111.53050000,
+                'alamat' => 'Jl. Cokroaminoto No. 88, Kecamatan Taman, Kota Madiun, Jawa Timur',
+                'keterangan_lokasi' => 'Daerah komersil padat penduduk.'
             ],
         ];
 

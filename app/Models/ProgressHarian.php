@@ -14,15 +14,20 @@ class ProgressHarian extends Model
 
     protected $fillable = [
         'proyek_id',
-        'tanggal',
+        'tanggal_pelaksanaan',
+        'uraian_pekerjaan',
+        'volume_pekerjaan',
         'persentase',
-        'keterangan',
+        'progres_harian',
+        'kendala',
+        'solusi',
         'input_by',
     ];
 
     protected $casts = [
-        'tanggal' => 'date',
+        'tanggal_pelaksanaan' => 'date',
         'persentase' => 'decimal:2',
+        'progres_harian' => 'decimal:2',
     ];
 
     public function proyek(): BelongsTo

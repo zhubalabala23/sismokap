@@ -258,11 +258,11 @@
         <div class="logo-section">
             <div class="logo-text" style="font-size: 20px; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 12px; font-family: 'Outfit', sans-serif; letter-spacing: 1px;">
                 @php
-                    $logoSetting = \App\Models\Setting::getValue('logo');
+                    $logoUrl = \App\Models\Setting::getLogoUrl();
                     $namaInstansi = \App\Models\Setting::getValue('nama_instansi', 'SISMOKAP');
                 @endphp
-                @if($logoSetting)
-                    <img src="{{ asset('storage/' . $logoSetting) }}" alt="Logo" style="height: 34px; object-fit: contain;">
+                @if($logoUrl)
+                    <img src="{{ $logoUrl }}" alt="Logo" style="height: 34px; object-fit: contain;">
                 @else
                     <i class="bi bi-shield-fill text-primary"></i>
                 @endif
@@ -353,33 +353,17 @@
             </div>
 
             <div class="d-flex align-items-center gap-3">
-                <div class="navbar-search d-none d-md-block">
-                    <i class="bi bi-search"></i>
-                    <input type="text" placeholder="Cari data proyek...">
-                </div>
-
-                <button class="btn btn-light rounded-circle p-2 position-relative" style="width: 40px; height: 40px;">
-                    <i class="bi bi-bell"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="padding: 4px;">
-                        <span class="visually-hidden">Notifikasi</span>
-                    </span>
-                </button>
-
-                <button class="btn btn-light rounded-circle p-2" style="width: 40px; height: 40px;">
-                    <i class="bi bi-question-circle"></i>
-                </button>
-
-                <div class="vr mx-1"></div>
-
                 <div class="profile-section dropdown">
                     <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <div class="text-end d-none d-sm-block">
+                        <div class="text-end d-none d-sm-block me-2">
                             <h6 class="profile-name">{{ auth()->user()->name }}</h6>
                             <p class="profile-role">
                                 {{ auth()->user()->role === 'admin' ? 'Super Admin' : (auth()->user()->role === 'pimpinan' ? 'Pimpinan' : 'Operator') }}
                             </p>
                         </div>
-                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150&auto=format&fit=crop" alt="Avatar" class="profile-avatar">
+                        <div class="profile-avatar d-flex align-items-center justify-content-center bg-secondary-subtle text-secondary border">
+                            <i class="bi bi-person-fill fs-5"></i>
+                        </div>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" aria-labelledby="profileDropdown">
                         <li>

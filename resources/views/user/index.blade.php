@@ -33,6 +33,7 @@
                     <th scope="col">NAMA</th>
                     <th scope="col">EMAIL</th>
                     <th scope="col">ROLE</th>
+                    <th scope="col">PASSWORD</th>
                     <th scope="col" class="text-center" style="width: 180px;">AKSI</th>
                 </tr>
             </thead>
@@ -44,11 +45,25 @@
                         <td class="fs-7 text-dark">{{ $userItem->email }}</td>
                         <td>
                             @if($userItem->role === 'admin')
-                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 fs-8">ADMIN</span>
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 fs-8">ADMINISTRATOR</span>
                             @elseif($userItem->role === 'operator')
                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 fs-8">OPERATOR</span>
+                            @elseif($userItem->role === 'pengawas')
+                                <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 fs-8">PENGAWAS</span>
                             @else
                                 <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 fs-8">PIMPINAN</span>
+                            @endif
+                        </td>
+                        <td class="fs-7 text-dark">
+                            @if($userItem->password_plain)
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="password-text" data-password="{{ $userItem->password_plain }}">{{ str_repeat('*', strlen($userItem->password_plain)) }}</span>
+                                    <button type="button" class="btn btn-sm btn-link p-0 text-muted toggle-password-visibility" style="text-decoration: none;">
+                                        <i class="bi bi-eye-slash-fill"></i>
+                                    </button>
+                                </div>
+                            @else
+                                -
                             @endif
                         </td>
                         <td>
@@ -75,7 +90,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="text-center text-muted py-4 fs-7">Tidak ada data user ditemukan.</td>
+                        <td colspan="6" class="text-center text-muted py-4 fs-7">Tidak ada data user ditemukan.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -90,4 +105,29 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Toggle password visibility in the table list
+        document.querySelectorAll('.toggle-password-visibility').forEach(button => {
+            button.addEventListener('click', function() {
+                const container = this.closest('div');
+                const textSpan = container.querySelector('.password-text');
+                const icon = this.querySelector('i');
+                const plainPassword = textSpan.getAttribute('data-password');
+                const maskedPassword = '*'.repeat(plainPassword.length);
+
+                if (textSpan.textContent === maskedPassword) {
+                    textSpan.textContent = plainPassword;
+                    icon.className = 'bi bi-eye-fill';
+                } else {
+                    textSpan.textContent = maskedPassword;
+                    icon.className = 'bi bi-eye-slash-fill';
+                }
+            });
+        });
+    });
+</script>
 @endsection

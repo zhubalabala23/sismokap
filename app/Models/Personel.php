@@ -13,8 +13,14 @@ class Personel extends Model
     protected $table = 'personel';
 
     protected $fillable = [
+        'nrp_nip',
         'nama',
+        'pangkat_golongan',
         'jabatan',
-        'kontak',
+        'no_hp',
+        'email',
+        'unit_kerja',
+        'hak_akses',
+        'password',
     ];
 }

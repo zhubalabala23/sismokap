@@ -40,13 +40,13 @@
                         <input type="email" name="email" id="email" class="form-control fs-7 @error('email') is-invalid @enderror" placeholder="Contoh: user@domain.com" value="{{ old('email') }}" required>
                     </div>
 
-                    <!-- Role -->
                     <div class="col-12 col-md-6">
                         <label for="role" class="form-label fs-7 fw-semibold text-dark">Hak Akses / Role <span class="text-danger">*</span></label>
                         <select name="role" id="role" class="form-select fs-7 @error('role') is-invalid @enderror" required>
                             <option value="">Pilih Role</option>
-                            <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                            <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Administrator</option>
                             <option value="operator" {{ old('role') == 'operator' ? 'selected' : '' }}>Operator</option>
+                            <option value="pengawas" {{ old('role') == 'pengawas' ? 'selected' : '' }}>Pengawas</option>
                             <option value="pimpinan" {{ old('role') == 'pimpinan' ? 'selected' : '' }}>Pimpinan</option>
                         </select>
                     </div>

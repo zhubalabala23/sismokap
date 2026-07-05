@@ -26,18 +26,38 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="tanggal" class="form-label fs-7 fw-semibold text-dark">Tanggal Progress <span class="text-danger">*</span></label>
-                        <input type="date" name="tanggal" id="tanggal" class="form-control fs-7" value="{{ old('tanggal', date('Y-m-d')) }}" required>
+                        <label for="tanggal_pelaksanaan" class="form-label fs-7 fw-semibold text-dark">Tanggal Pelaksanaan <span class="text-danger">*</span></label>
+                        <input type="date" name="tanggal_pelaksanaan" id="tanggal_pelaksanaan" class="form-control fs-7" value="{{ old('tanggal_pelaksanaan', date('Y-m-d')) }}" required>
                     </div>
 
                     <div class="mb-3">
-                        <label for="persentase" class="form-label fs-7 fw-semibold text-dark">Persentase Akumulatif (%) <span class="text-danger">*</span></label>
+                        <label for="uraian_pekerjaan" class="form-label fs-7 fw-semibold text-dark">Uraian Pekerjaan <span class="text-danger">*</span></label>
+                        <input type="text" name="uraian_pekerjaan" id="uraian_pekerjaan" class="form-control fs-7" placeholder="Contoh: Pekerjaan Galian Tanah" value="{{ old('uraian_pekerjaan') }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="volume_pekerjaan" class="form-label fs-7 fw-semibold text-dark">Volume Pekerjaan <span class="text-danger">*</span></label>
+                        <input type="text" name="volume_pekerjaan" id="volume_pekerjaan" class="form-control fs-7" placeholder="Contoh: 150 m3 atau 20 meter" value="{{ old('volume_pekerjaan') }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="persentase" class="form-label fs-7 fw-semibold text-dark">Bobot Pekerjaan (Akumulatif %) <span class="text-danger">*</span></label>
                         <input type="number" step="0.01" min="0" max="100" name="persentase" id="persentase" class="form-control fs-7" placeholder="Contoh: 12.50" value="{{ old('persentase') }}" required>
                     </div>
 
                     <div class="mb-3">
-                        <label for="keterangan" class="form-label fs-7 fw-semibold text-dark">Keterangan / Catatan</label>
-                        <textarea name="keterangan" id="keterangan" rows="3" class="form-control fs-7" placeholder="Deskripsikan pekerjaan yang selesai pada hari ini...">{{ old('keterangan') }}</textarea>
+                        <label for="progres_harian" class="form-label fs-7 fw-semibold text-dark">Persentase Progres Harian (%) <span class="text-danger">*</span></label>
+                        <input type="number" step="0.01" min="0" max="100" name="progres_harian" id="progres_harian" class="form-control fs-7" placeholder="Contoh: 1.25" value="{{ old('progres_harian') }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="kendala" class="form-label fs-7 fw-semibold text-dark">Kendala Lapangan</label>
+                        <textarea name="kendala" id="kendala" rows="2" class="form-control fs-7" placeholder="Deskripsikan kendala jika ada...">{{ old('kendala') }}</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="solusi" class="form-label fs-7 fw-semibold text-dark">Solusi Yang Dilakukan</label>
+                        <textarea name="solusi" id="solusi" rows="2" class="form-control fs-7" placeholder="Deskripsikan solusi yang dilakukan...">{{ old('solusi') }}</textarea>
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100 fs-7 py-2 mt-2">
@@ -72,26 +92,34 @@
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
-                        <tr class="text-muted fs-7">
-                            <th scope="col">TANGGAL</th>
+                        <tr class="text-muted fs-7 text-nowrap">
+                            <th scope="col">TANGGAL PELAKSANAAN</th>
                             <th scope="col">PROYEK</th>
-                            <th scope="col" style="width: 100px;">PROGRESS</th>
-                            <th scope="col">KETERANGAN</th>
-                            <th scope="col">INPUT OLEH</th>
+                            <th scope="col">URAIAN PEKERJAAN</th>
+                            <th scope="col">VOLUME</th>
+                            <th scope="col">BOBOT (AKUMULATIF)</th>
+                            <th scope="col">PROGRES HARIAN</th>
+                            <th scope="col">KENDALA</th>
+                            <th scope="col">SOLUSI</th>
+                            <th scope="col">PETUGAS INPUT</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($progressHarians as $entry)
-                            <tr>
-                                <td class="fs-7 fw-semibold text-dark">{{ $entry->tanggal->format('d M Y') }}</td>
-                                <td class="fs-7 fw-semibold text-primary">{{ $entry->proyek->nama_proyek }}</td>
-                                <td class="fs-7 fw-bold text-dark">{{ number_format($entry->persentase, 2) }}%</td>
-                                <td class="fs-7 text-muted">{{ $entry->keterangan ?? '-' }}</td>
-                                <td class="fs-7 text-dark">{{ $entry->user->name ?? '-' }}</td>
+                            <tr class="text-nowrap fs-7">
+                                <td class="fw-semibold text-dark">{{ $entry->tanggal_pelaksanaan->format('d M Y') }}</td>
+                                <td class="fw-semibold text-primary">{{ $entry->proyek?->nama_proyek ?? '-' }}</td>
+                                <td class="text-dark">{{ $entry->uraian_pekerjaan ?? '-' }}</td>
+                                <td class="text-dark">{{ $entry->volume_pekerjaan ?? '-' }}</td>
+                                <td class="fw-bold text-dark">{{ number_format($entry->persentase, 2) }}%</td>
+                                <td class="fw-bold text-success">{{ number_format($entry->progres_harian, 2) }}%</td>
+                                <td class="text-muted text-wrap" style="max-width: 150px;">{{ $entry->kendala ?? '-' }}</td>
+                                <td class="text-muted text-wrap" style="max-width: 150px;">{{ $entry->solusi ?? '-' }}</td>
+                                <td class="text-dark">{{ $entry->user->name ?? '-' }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center text-muted py-4 fs-7">Belum ada riwayat progress harian.</td>
+                                <td colspan="9" class="text-center text-muted py-4 fs-7">Belum ada riwayat progress harian.</td>
                             </tr>
                         @endforelse
                     </tbody>

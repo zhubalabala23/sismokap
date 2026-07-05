@@ -39,21 +39,33 @@
     <div class="table-responsive">
         <table class="table table-hover align-middle">
             <thead class="table-light">
-                <tr class="text-muted fs-7">
+                <tr class="text-muted fs-7 text-nowrap">
                     <th scope="col" style="width: 80px;">NO</th>
-                    <th scope="col">NAMA KONTRAKTOR</th>
-                    <th scope="col">KONTAK</th>
+                    <th scope="col">NAMA PERUSAHAAN</th>
+                    <th scope="col">PROYEK</th>
+                    <th scope="col">PENANGGUNG JAWAB</th>
+                    <th scope="col">TELEPON</th>
+                    <th scope="col">EMAIL</th>
+                    <th scope="col">NOMOR KONTRAK</th>
+                    <th scope="col">MASA BERLAKU</th>
                     <th scope="col">ALAMAT</th>
                     <th scope="col" class="text-center" style="width: 150px;">AKSI</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($kontraktors as $index => $kontraktor)
-                    <tr>
-                        <td class="fs-7">{{ $kontraktors->firstItem() + $index }}</td>
-                        <td class="fs-7 fw-semibold text-dark">{{ $kontraktor->nama_kontraktor }}</td>
-                        <td class="fs-7 text-dark">{{ $kontraktor->kontak }}</td>
-                        <td class="fs-7 text-muted">{{ $kontraktor->alamat }}</td>
+                    <tr class="text-nowrap fs-7">
+                        <td>{{ $kontraktors->firstItem() + $index }}</td>
+                        <td class="fw-semibold text-dark">{{ $kontraktor->nama_kontraktor }}</td>
+                        <td class="text-primary fw-semibold">{{ $kontraktor->proyekAssociated?->nama_proyek ?? '-' }}</td>
+                        <td class="text-dark">{{ $kontraktor->nama_penanggung_jawab ?? '-' }}</td>
+                        <td class="text-dark">{{ $kontraktor->no_telp ?? '-' }}</td>
+                        <td class="text-dark">{{ $kontraktor->email ?? '-' }}</td>
+                        <td class="text-dark">{{ $kontraktor->no_kontrak ?? '-' }}</td>
+                        <td class="text-dark">
+                            {{ $kontraktor->masa_berlaku_kontrak ? $kontraktor->masa_berlaku_kontrak->format('d M Y') : '-' }}
+                        </td>
+                        <td class="text-muted text-wrap" style="max-width: 250px;">{{ $kontraktor->alamat }}</td>
                         <td>
                             <div class="d-flex justify-content-center gap-2">
                                 <button type="button" class="btn btn-sm btn-light border text-primary edit-button" 
@@ -61,8 +73,13 @@
                                     data-bs-target="#editKontraktorModal" 
                                     data-id="{{ $kontraktor->id }}" 
                                     data-nama="{{ $kontraktor->nama_kontraktor }}" 
-                                    data-kontak="{{ $kontraktor->kontak }}"
                                     data-alamat="{{ $kontraktor->alamat }}"
+                                    data-proyek="{{ $kontraktor->proyek_id }}"
+                                    data-pj="{{ $kontraktor->nama_penanggung_jawab }}"
+                                    data-telp="{{ $kontraktor->no_telp }}"
+                                    data-email="{{ $kontraktor->email }}"
+                                    data-nokontrak="{{ $kontraktor->no_kontrak }}"
+                                    data-berlaku="{{ $kontraktor->masa_berlaku_kontrak ? $kontraktor->masa_berlaku_kontrak->format('Y-m-d') : '' }}"
                                     title="Edit">
                                     <i class="bi bi-pencil-fill"></i> Edit
                                 </button>
@@ -78,7 +95,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="text-center text-muted py-4 fs-7">Tidak ada data kontraktor ditemukan.</td>
+                        <td colspan="10" class="text-center text-muted py-4 fs-7">Tidak ada data kontraktor ditemukan.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -106,16 +123,41 @@
                 @csrf
                 <div class="modal-body py-4">
                     <div class="mb-3">
-                        <label for="nama_kontraktor" class="form-label fs-7 fw-semibold text-dark">Nama Kontraktor <span class="text-danger">*</span></label>
+                        <label for="proyek_id" class="form-label fs-7 fw-semibold text-dark">Pilih Proyek (Opsional)</label>
+                        <select name="proyek_id" id="proyek_id" class="form-select fs-7">
+                            <option value="">-- Pilih Proyek --</option>
+                            @foreach($proyeks as $proyek)
+                                <option value="{{ $proyek->id }}">{{ $proyek->nama_proyek }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nama_kontraktor" class="form-label fs-7 fw-semibold text-dark">Nama Perusahaan <span class="text-danger">*</span></label>
                         <input type="text" name="nama_kontraktor" id="nama_kontraktor" class="form-control fs-7" placeholder="Contoh: PT Madiun Bangun Nusantara" required>
                     </div>
                     <div class="mb-3">
-                        <label for="kontak" class="form-label fs-7 fw-semibold text-dark">Kontak/Telepon <span class="text-danger">*</span></label>
-                        <input type="text" name="kontak" id="kontak" class="form-control fs-7" placeholder="Contoh: 08123456789" required>
+                        <label for="alamat" class="form-label fs-7 fw-semibold text-dark">Alamat Perusahaan <span class="text-danger">*</span></label>
+                        <textarea name="alamat" id="alamat" rows="2" class="form-control fs-7" placeholder="Masukkan alamat lengkap kantor..." required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nama_penanggung_jawab" class="form-label fs-7 fw-semibold text-dark">Nama Penanggung Jawab</label>
+                        <input type="text" name="nama_penanggung_jawab" id="nama_penanggung_jawab" class="form-control fs-7" placeholder="Contoh: Ir. H. Ahmad Fauzi">
+                    </div>
+                    <div class="mb-3">
+                        <label for="no_telp" class="form-label fs-7 fw-semibold text-dark">Nomor Telepon</label>
+                        <input type="text" name="no_telp" id="no_telp" class="form-control fs-7" placeholder="Contoh: 08123456789">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label fs-7 fw-semibold text-dark">Email</label>
+                        <input type="email" name="email" id="email" class="form-control fs-7" placeholder="Contoh: admin@perusahaan.com">
+                    </div>
+                    <div class="mb-3">
+                        <label for="no_kontrak" class="form-label fs-7 fw-semibold text-dark">Nomor Kontrak</label>
+                        <input type="text" name="no_kontrak" id="no_kontrak" class="form-control fs-7" placeholder="Contoh: SPK/02/VIII/2025">
                     </div>
                     <div class="mb-0">
-                        <label for="alamat" class="form-label fs-7 fw-semibold text-dark">Alamat Kantor <span class="text-danger">*</span></label>
-                        <textarea name="alamat" id="alamat" rows="3" class="form-control fs-7" placeholder="Masukkan alamat lengkap kontraktor..." required></textarea>
+                        <label for="masa_berlaku_kontrak" class="form-label fs-7 fw-semibold text-dark">Masa Berlaku Kontrak</label>
+                        <input type="date" name="masa_berlaku_kontrak" id="masa_berlaku_kontrak" class="form-control fs-7">
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
@@ -140,16 +182,41 @@
                 @method('PUT')
                 <div class="modal-body py-4">
                     <div class="mb-3">
-                        <label for="edit_nama_kontraktor" class="form-label fs-7 fw-semibold text-dark">Nama Kontraktor <span class="text-danger">*</span></label>
+                        <label for="edit_proyek_id" class="form-label fs-7 fw-semibold text-dark">Pilih Proyek (Opsional)</label>
+                        <select name="proyek_id" id="edit_proyek_id" class="form-select fs-7">
+                            <option value="">-- Pilih Proyek --</option>
+                            @foreach($proyeks as $proyek)
+                                <option value="{{ $proyek->id }}">{{ $proyek->nama_proyek }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_nama_kontraktor" class="form-label fs-7 fw-semibold text-dark">Nama Perusahaan <span class="text-danger">*</span></label>
                         <input type="text" name="nama_kontraktor" id="edit_nama_kontraktor" class="form-control fs-7" required>
                     </div>
                     <div class="mb-3">
-                        <label for="edit_kontak" class="form-label fs-7 fw-semibold text-dark">Kontak/Telepon <span class="text-danger">*</span></label>
-                        <input type="text" name="kontak" id="edit_kontak" class="form-control fs-7" required>
+                        <label for="edit_alamat" class="form-label fs-7 fw-semibold text-dark">Alamat Perusahaan <span class="text-danger">*</span></label>
+                        <textarea name="alamat" id="edit_alamat" rows="2" class="form-control fs-7" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_nama_penanggung_jawab" class="form-label fs-7 fw-semibold text-dark">Nama Penanggung Jawab</label>
+                        <input type="text" name="nama_penanggung_jawab" id="edit_nama_penanggung_jawab" class="form-control fs-7">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_no_telp" class="form-label fs-7 fw-semibold text-dark">Nomor Telepon</label>
+                        <input type="text" name="no_telp" id="edit_no_telp" class="form-control fs-7">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_email" class="form-label fs-7 fw-semibold text-dark">Email</label>
+                        <input type="email" name="email" id="edit_email" class="form-control fs-7">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_no_kontrak" class="form-label fs-7 fw-semibold text-dark">Nomor Kontrak</label>
+                        <input type="text" name="no_kontrak" id="edit_no_kontrak" class="form-control fs-7">
                     </div>
                     <div class="mb-0">
-                        <label for="edit_alamat" class="form-label fs-7 fw-semibold text-dark">Alamat Kantor <span class="text-danger">*</span></label>
-                        <textarea name="alamat" id="edit_alamat" rows="3" class="form-control fs-7" required></textarea>
+                        <label for="edit_masa_berlaku_kontrak" class="form-label fs-7 fw-semibold text-dark">Masa Berlaku Kontrak</label>
+                        <input type="date" name="masa_berlaku_kontrak" id="edit_masa_berlaku_kontrak" class="form-control fs-7">
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
@@ -171,15 +238,25 @@
                 const button = event.relatedTarget;
                 const id = button.getAttribute('data-id');
                 const nama = button.getAttribute('data-nama');
-                const kontak = button.getAttribute('data-kontak');
                 const alamat = button.getAttribute('data-alamat');
+                const proyekId = button.getAttribute('data-proyek');
+                const pj = button.getAttribute('data-pj');
+                const telp = button.getAttribute('data-telp');
+                const email = button.getAttribute('data-email');
+                const nokontrak = button.getAttribute('data-nokontrak');
+                const berlaku = button.getAttribute('data-berlaku');
 
                 const form = document.getElementById('editKontraktorForm');
                 form.action = `/admin/kontraktor/${id}`;
                 
-                document.getElementById('edit_nama_kontraktor').value = nama;
-                document.getElementById('edit_kontak').value = kontak;
-                document.getElementById('edit_alamat').value = alamat;
+                document.getElementById('edit_nama_kontraktor').value = nama || '';
+                document.getElementById('edit_alamat').value = alamat || '';
+                document.getElementById('edit_proyek_id').value = proyekId || '';
+                document.getElementById('edit_nama_penanggung_jawab').value = pj || '';
+                document.getElementById('edit_no_telp').value = telp || '';
+                document.getElementById('edit_email').value = email || '';
+                document.getElementById('edit_no_kontrak').value = nokontrak || '';
+                document.getElementById('edit_masa_berlaku_kontrak').value = berlaku || '';
             });
         }
     });
