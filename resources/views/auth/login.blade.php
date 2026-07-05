@@ -38,25 +38,15 @@
         </div>
 
         <!-- Remember Me -->
-        <div class="mb-4 d-flex justify-content-between align-items-center">
+        <div class="mb-4">
             <div class="form-check checkbox-custom">
                 <input id="remember_me" type="checkbox" name="remember" class="form-check-input">
                 <label for="remember_me" class="form-check-label text-muted-custom small">Ingat saya</label>
             </div>
-            @if (Route::has('password.request'))
-                <a class="auth-link small" href="{{ route('password.request') }}">
-                    Lupa sandi?
-                </a>
-            @endif
         </div>
 
         <button type="submit" class="btn btn-military mb-3">
             Masuk <i class="bi bi-box-arrow-in-right ms-1"></i>
         </button>
-
-        <div class="text-center">
-            <span class="text-muted-custom small">Belum punya akun?</span>
-            <a class="auth-link small ms-1" href="{{ route('register') }}">Daftar Baru</a>
-        </div>
     </form>
 </x-guest-layout>
