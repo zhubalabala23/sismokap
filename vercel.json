@@ -3,6 +3,7 @@
   "framework": null,
   "outputDirectory": "public",
   "buildCommand": "npm install && npm run build",
+  "regions": ["sin1"],
   "env": {
     "APP_CONFIG_CACHE": "/tmp/config.php",
     "APP_EVENTS_CACHE": "/tmp/events.php",
