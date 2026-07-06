@@ -38,7 +38,13 @@
                     <!-- Nama Proyek -->
                     <div class="col-12 col-md-6">
                         <label for="nama_proyek" class="form-label fs-7 fw-semibold text-dark">Nama Proyek <span class="text-danger">*</span></label>
-                        <input type="text" name="nama_proyek" id="nama_proyek" class="form-control fs-7 @error('nama_proyek') is-invalid @enderror" placeholder="Contoh: Gedung Serbaguna" value="{{ old('nama_proyek', $proyek->nama_proyek) }}" required>
+                        <select name="nama_proyek" id="nama_proyek" class="form-select fs-7 @error('nama_proyek') is-invalid @enderror" required>
+                            <option value="">Pilih Nama Proyek</option>
+                            <option value="Gedung Serba Guna" {{ old('nama_proyek', $proyek->nama_proyek) == 'Gedung Serba Guna' ? 'selected' : '' }}>Gedung Serba Guna</option>
+                            <option value="Kontruksi Jembatan" {{ old('nama_proyek', $proyek->nama_proyek) == 'Kontruksi Jembatan' ? 'selected' : '' }}>Kontruksi Jembatan</option>
+                            <option value="Kontruksi Jalan" {{ old('nama_proyek', $proyek->nama_proyek) == 'Kontruksi Jalan' ? 'selected' : '' }}>Kontruksi Jalan</option>
+                            <option value="Kontruksi Perumahan" {{ old('nama_proyek', $proyek->nama_proyek) == 'Kontruksi Perumahan' ? 'selected' : '' }}>Kontruksi Perumahan</option>
+                        </select>
                     </div>
 
                     <!-- Jenis Pekerjaan -->
@@ -56,18 +62,13 @@
                     <!-- Lokasi -->
                     <div class="col-12 col-md-6">
                         <label for="lokasi_nama" class="form-label fs-7 fw-semibold text-dark">Lokasi Proyek <span class="text-danger">*</span></label>
-                        <input type="text" name="lokasi_nama" id="lokasi_nama" class="form-control fs-7 @error('lokasi_nama') is-invalid @enderror" placeholder="Contoh: Kampus Trilogi, Jakarta" value="{{ old('lokasi_nama', $proyek->lokasi?->nama_lokasi) }}" required>
+                        <input type="text" name="lokasi_nama" id="lokasi_nama" class="form-control fs-7 @error('lokasi_nama') is-invalid @enderror" placeholder="Contoh: Madiun Kota" value="{{ old('lokasi_nama', $proyek->lokasi?->nama_lokasi) }}" required>
                     </div>
 
-                    <!-- Satuan Pelaksana -->
+                    <!-- Pelaksana -->
                     <div class="col-12 col-md-6">
-                        <label for="kontraktor_id" class="form-label fs-7 fw-semibold text-dark">Satuan Pelaksana <span class="text-danger">*</span></label>
-                        <select name="kontraktor_id" id="kontraktor_id" class="form-select fs-7 @error('kontraktor_id') is-invalid @enderror" required>
-                            <option value="">Pilih Satuan Pelaksana</option>
-                            @foreach($kontraktors as $kontraktor)
-                                <option value="{{ $kontraktor->id }}" {{ old('kontraktor_id', $proyek->kontraktor_id) == $kontraktor->id ? 'selected' : '' }}>{{ $kontraktor->nama_kontraktor }}</option>
-                            @endforeach
-                        </select>
+                        <label for="pelaksana_nama" class="form-label fs-7 fw-semibold text-dark">Pelaksana <span class="text-danger">*</span></label>
+                        <input type="text" name="pelaksana_nama" id="pelaksana_nama" class="form-control fs-7 @error('pelaksana_nama') is-invalid @enderror" placeholder="Contoh: CV. Karya Mandiri" value="{{ old('pelaksana_nama', $proyek->kontraktor?->nama_kontraktor) }}" required>
                     </div>
 
                     <!-- Nilai Kontrak -->

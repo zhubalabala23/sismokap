@@ -145,6 +145,14 @@
             @empty
                 <p class="text-center text-muted py-4 fs-7">Tidak ada data proyek ditemukan.</p>
             @endforelse
+
+            <!-- Pagination -->
+            <div class="d-flex justify-content-between align-items-center mt-3 border-top pt-3">
+                <p class="text-muted fs-7 mb-0">Menampilkan {{ $galleryProyeks->firstItem() ?? 0 }} sampai {{ $galleryProyeks->lastItem() ?? 0 }} dari {{ $galleryProyeks->total() }} proyek</p>
+                <div>
+                    {{ $galleryProyeks->links('pagination::bootstrap-5') }}
+                </div>
+            </div>
         </div>
     </div>
 </div>

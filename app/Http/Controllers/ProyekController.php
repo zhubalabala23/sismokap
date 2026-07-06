@@ -33,7 +33,7 @@ class ProyekController extends Controller
             $query->where('status', $status);
         }
 
-        $proyeks = $query->paginate(10)->withQueryString();
+        $proyeks = $query->paginate(15)->withQueryString();
 
         return view('proyek.index', compact('proyeks', 'search', 'status'));
     }
@@ -58,11 +58,20 @@ class ProyekController extends Controller
         $validatedData['lokasi_id'] = $lokasi->id;
         unset($validatedData['lokasi_nama']);
 
+        $pelaksanaNama = $validatedData['pelaksana_nama'];
+        $kontraktor = Kontraktor::firstOrCreate(
+            ['nama_kontraktor' => $pelaksanaNama],
+            ['alamat' => '-']
+        );
+        
+        $validatedData['kontraktor_id'] = $kontraktor->id;
+        unset($validatedData['pelaksana_nama']);
+
         $proyek = Proyek::create($validatedData);
 
         if ($request->hasFile('foto')) {
             $disk = config('filesystems.default');
-            $path = $request->file('foto')->store('dokumentasi', $disk);
+            $path = \App\Models\Dokumentasi::uploadAndCompressImage($request->file('foto'), $disk);
 
             \App\Models\Dokumentasi::create([
                 'proyek_id' => $proyek->id,
@@ -126,12 +135,37 @@ class ProyekController extends Controller
         
         unset($validatedData['lokasi_nama']);
 
+        $pelaksanaNama = $validatedData['pelaksana_nama'];
+        if ($proyek->kontraktor_id) {
+            $currentKontraktor = $proyek->kontraktor;
+            if ($currentKontraktor && $currentKontraktor->nama_kontraktor !== $pelaksanaNama) {
+                $existingKontraktor = Kontraktor::where('nama_kontraktor', $pelaksanaNama)->first();
+                if ($existingKontraktor) {
+                    $validatedData['kontraktor_id'] = $existingKontraktor->id;
+                } else {
+                    $currentKontraktor->update([
+                        'nama_kontraktor' => $pelaksanaNama
+                    ]);
+                    $validatedData['kontraktor_id'] = $currentKontraktor->id;
+                }
+            } else {
+                $validatedData['kontraktor_id'] = $proyek->kontraktor_id;
+            }
+        } else {
+            $kontraktor = Kontraktor::firstOrCreate(
+                ['nama_kontraktor' => $pelaksanaNama],
+                ['alamat' => '-']
+            );
+            $validatedData['kontraktor_id'] = $kontraktor->id;
+        }
+        unset($validatedData['pelaksana_nama']);
+
         $proyek->update($validatedData);
 
         // Handle image upload / edit
         if ($request->hasFile('foto')) {
             $disk = config('filesystems.default');
-            $path = $request->file('foto')->store('dokumentasi', $disk);
+            $path = \App\Models\Dokumentasi::uploadAndCompressImage($request->file('foto'), $disk);
             
             // Try to find the first/initial documentation for this project
             $initialFoto = $proyek->dokumentasi()->first();

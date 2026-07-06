@@ -25,7 +25,7 @@ class DokumentasiController extends Controller
             $query->where('id', $proyekId);
         }
 
-        $galleryProyeks = $query->get();
+        $galleryProyeks = $query->paginate(15)->withQueryString();
 
         return view('monitoring.dokumentasi', compact('galleryProyeks', 'proyeks', 'proyekId'));
     }
@@ -34,7 +34,7 @@ class DokumentasiController extends Controller
     {
         if ($request->hasFile('file')) {
             $disk = config('filesystems.default');
-            $path = $request->file('file')->store('dokumentasi', $disk);
+            $path = Dokumentasi::uploadAndCompressImage($request->file('file'), $disk);
 
             $videoPath = null;
             if ($request->hasFile('video')) {

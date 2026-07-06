@@ -67,7 +67,7 @@
                     <th scope="col" class="text-center" style="width: 50px;">NO</th>
                     <th scope="col" style="width: 250px;">KODE & NAMA PROYEK</th>
                     <th scope="col">LOKASI</th>
-                    <th scope="col">SATUAN PELAKSANA</th>
+                    <th scope="col">PELAKSANA</th>
                     <th scope="col" class="text-center" style="width: 100px;">TARGET PROGRESS</th>
                     <th scope="col" style="width: 200px;">REALISASI PROGRESS</th>
                     <th scope="col" class="text-center" style="width: 130px;">BOBOT PEKERJAAN (AKUMULATIF)</th>
@@ -79,7 +79,7 @@
             <tbody>
                 @forelse($reportData as $index => $item)
                     <tr class="text-nowrap fs-7">
-                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td class="text-center">{{ $reportData->firstItem() + $index }}</td>
                         <td>
                             <div class="fw-bold text-primary">{{ $item['kode_proyek'] }}</div>
                             <div class="fw-semibold text-dark">{{ $item['nama_proyek'] }}</div>
@@ -120,6 +120,14 @@
                 @endforelse
             </tbody>
         </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-between align-items-center mt-3 border-top pt-3">
+        <p class="text-muted fs-7 mb-0">Menampilkan {{ $reportData->firstItem() ?? 0 }} sampai {{ $reportData->lastItem() ?? 0 }} dari {{ $reportData->total() }} proyek</p>
+        <div>
+            {{ $reportData->links('pagination::bootstrap-5') }}
+        </div>
     </div>
 
     <div class="mt-3 p-3 bg-light rounded-3">

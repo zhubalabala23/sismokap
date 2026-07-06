@@ -93,5 +93,13 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-between align-items-center mt-3 border-top pt-3">
+        <p class="text-muted fs-7 mb-0">Menampilkan {{ $reportData->firstItem() ?? 0 }} sampai {{ $reportData->lastItem() ?? 0 }} dari {{ $reportData->total() }} entri</p>
+        <div>
+            {{ $reportData->links('pagination::bootstrap-5') }}
+        </div>
+    </div>
 </div>
 @endsection

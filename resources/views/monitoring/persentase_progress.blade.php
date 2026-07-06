@@ -61,7 +61,7 @@
                             <th scope="col" class="text-center" style="width: 50px;">NO</th>
                             <th scope="col" style="width: 250px;">KODE & NAMA PROYEK</th>
                             <th scope="col">LOKASI</th>
-                            <th scope="col">SATUAN PELAKSANA</th>
+                            <th scope="col">PELAKSANA</th>
                             <th scope="col" class="text-center" style="width: 100px;">TARGET PROGRESS</th>
                             <th scope="col" style="width: 200px;">REALISASI PROGRESS</th>
                             <th scope="col" class="text-center" style="width: 130px;">BOBOT PEKERJAAN (AKUMULATIF)</th>

@@ -97,4 +97,21 @@ class Proyek extends Model
         $this->status = $status;
         $this->save();
     }
+
+    protected static function booted()
+    {
+        static::saved(function ($proyek) {
+            self::clearDashboardCache();
+        });
+        static::deleted(function ($proyek) {
+            self::clearDashboardCache();
+        });
+    }
+
+    public static function clearDashboardCache()
+    {
+        foreach (range(date('Y') - 5, date('Y') + 5) as $yr) {
+            \Illuminate\Support\Facades\Cache::forget("dashboard_data_{$yr}");
+        }
+    }
 }

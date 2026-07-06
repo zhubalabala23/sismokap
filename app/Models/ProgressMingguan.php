@@ -38,4 +38,14 @@ class ProgressMingguan extends Model
     {
         return $this->belongsTo(Proyek::class, 'proyek_id');
     }
+
+    protected static function booted()
+    {
+        static::saved(function ($progressMingguan) {
+            Proyek::clearDashboardCache();
+        });
+        static::deleted(function ($progressMingguan) {
+            Proyek::clearDashboardCache();
+        });
+    }
 }

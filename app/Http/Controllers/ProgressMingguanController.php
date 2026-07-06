@@ -19,7 +19,7 @@ class ProgressMingguanController extends Controller
             $query->where('proyek_id', $proyekId);
         }
 
-        $progressMingguans = $query->paginate(10)->withQueryString();
+        $progressMingguans = $query->paginate(15)->withQueryString();
         $proyeks = Proyek::orderBy('nama_proyek')->get();
 
         return view('monitoring.progress_mingguan', compact('progressMingguans', 'proyeks', 'proyekId'));

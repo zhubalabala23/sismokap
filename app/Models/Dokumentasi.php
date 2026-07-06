@@ -67,4 +67,26 @@ class Dokumentasi extends Model
     {
         return $this->belongsTo(Proyek::class, 'proyek_id');
     }
+
+    public static function uploadAndCompressImage($file, $disk)
+    {
+        $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+        $image = $manager->read($file->getRealPath());
+
+        if ($image->width() > 1200) {
+            $image->scale(width: 1200);
+        }
+
+        $mime = $file->getClientMimeType();
+        if (str_contains($mime, 'png')) {
+            $encoded = $image->toPng();
+        } else {
+            $encoded = $image->toJpg(75);
+        }
+
+        $path = 'dokumentasi/' . $file->hashName();
+        \Illuminate\Support\Facades\Storage::disk($disk)->put($path, (string) $encoded);
+
+        return $path;
+    }
 }

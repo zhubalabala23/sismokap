@@ -47,7 +47,7 @@
                         <th scope="col">NAMA PROYEK</th>
                         <th scope="col">JENIS PEKERJAAN</th>
                         <th scope="col">LOKASI</th>
-                        <th scope="col">SATUAN PELAKSANA</th>
+                        <th scope="col">PELAKSANA</th>
                         <th scope="col">NILAI KONTRAK</th>
                         <th scope="col">PERIODE</th>
                         <th scope="col" class="text-center">TARGET PROGRESS</th>

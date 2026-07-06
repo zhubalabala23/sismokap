@@ -39,4 +39,14 @@ class ProgressHarian extends Model
     {
         return $this->belongsTo(User::class, 'input_by');
     }
+
+    protected static function booted()
+    {
+        static::saved(function ($progressHarian) {
+            Proyek::clearDashboardCache();
+        });
+        static::deleted(function ($progressHarian) {
+            Proyek::clearDashboardCache();
+        });
+    }
 }

@@ -31,7 +31,7 @@ class LaporanController extends Controller
             $query->whereDate('tanggal_pelaksanaan', '<=', $endDate);
         }
  
-        $reportData = $query->orderBy('tanggal_pelaksanaan', 'desc')->orderBy('id', 'desc')->get();
+        $reportData = $query->orderBy('tanggal_pelaksanaan', 'desc')->orderBy('id', 'desc')->paginate(15)->withQueryString();
  
         $allProyeks = Proyek::orderBy('nama_proyek')->get();
  
@@ -80,7 +80,7 @@ class LaporanController extends Controller
             $query->where('tahun', $tahun);
         }
  
-        $reportData = $query->orderBy('tahun', 'desc')->orderBy('minggu_ke', 'desc')->orderBy('id', 'desc')->get();
+        $reportData = $query->orderBy('tahun', 'desc')->orderBy('minggu_ke', 'desc')->orderBy('id', 'desc')->paginate(15)->withQueryString();
  
         $allProyeks = Proyek::orderBy('nama_proyek')->get();
  
@@ -199,6 +199,17 @@ class LaporanController extends Controller
 
         $allProyeks = Proyek::orderBy('nama_proyek')->get();
 
+        $currentPage = \Illuminate\Pagination\Paginator::resolveCurrentPage() ?: 1;
+        $perPage = 15;
+        $currentPageItems = $reportData->slice(($currentPage - 1) * $perPage, $perPage)->all();
+        $reportData = new \Illuminate\Pagination\LengthAwarePaginator(
+            $currentPageItems,
+            $reportData->count(),
+            $perPage,
+            $currentPage,
+            ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(), 'query' => $request->query()]
+        );
+
         return view('laporan.bulanan', compact('allProyeks', 'reportData', 'proyekId', 'bulan', 'tahun', 'namaBulan'));
     }
 
@@ -306,10 +317,9 @@ class LaporanController extends Controller
                   ->orWhere('kode_proyek', 'like', "%{$search}%");
             });
         }
+        $proyeks = $query->orderBy('nama_proyek')->paginate(15)->withQueryString();
 
-        $proyeks = $query->orderBy('nama_proyek')->get();
-
-        $reportData = $proyeks->map(function ($proyek) use ($startDate, $endDate) {
+        $reportData = $proyeks->through(function ($proyek) use ($startDate, $endDate) {
             $harian = $proyek->progressHarian;
             
             if ($startDate) {

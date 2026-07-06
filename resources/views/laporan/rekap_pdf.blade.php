@@ -119,7 +119,7 @@
                 <th class="text-center" style="width: 25px;">NO</th>
                 <th style="width: 140px;">KODE & NAMA PROYEK</th>
                 <th>LOKASI</th>
-                <th>SATUAN PELAKSANA</th>
+                <th>PELAKSANA</th>
                 <th class="text-center" style="width: 60px;">TARGET PROGRESS</th>
                 <th class="text-center" style="width: 60px;">REALISASI PROGRESS</th>
                 <th class="text-center" style="width: 65px;">BOBOT PEKERJAAN (AKUMULATIF)</th>

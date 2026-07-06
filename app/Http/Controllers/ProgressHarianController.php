@@ -19,7 +19,7 @@ class ProgressHarianController extends Controller
             $query->where('proyek_id', $proyekId);
         }
 
-        $progressHarians = $query->paginate(10)->withQueryString();
+        $progressHarians = $query->paginate(15)->withQueryString();
         $proyeks = Proyek::orderBy('nama_proyek')->get();
 
         return view('monitoring.progress_harian', compact('progressHarians', 'proyeks', 'proyekId'));
