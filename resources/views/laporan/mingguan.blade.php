@@ -71,8 +71,8 @@
                     <tr class="text-nowrap fs-7">
                         <td class="fw-semibold text-dark">Minggu ke-{{ $entry->minggu_ke }} ({{ $entry->tahun }})</td>
                         <td class="fw-semibold text-primary">
-                            {{ $entry->proyek->nama_proyek }}
-                            <div class="text-muted fs-8 fw-normal">[{{ $entry->proyek->kode_proyek }}]</div>
+                            {{ $entry->proyek?->nama_proyek ?? 'Proyek Terhapus' }}
+                            <div class="text-muted fs-8 fw-normal">[{{ $entry->proyek?->kode_proyek ?? '-' }}]</div>
                         </td>
                         <td class="text-dark">{{ number_format($entry->progress_sebelumnya, 2) }}%</td>
                         <td class="text-dark">{{ number_format($entry->progress_berjalan, 2) }}%</td>

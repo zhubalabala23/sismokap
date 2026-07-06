@@ -130,7 +130,7 @@
             @forelse($reportData as $entry)
                 <tr>
                     <td style="white-space: nowrap;">{{ $entry->tanggal_pelaksanaan->format('d M Y') }}</td>
-                    <td class="fw-bold">{{ $entry->proyek->nama_proyek }}</td>
+                    <td class="fw-bold">{{ $entry->proyek?->nama_proyek ?? 'Proyek Terhapus' }}</td>
                     <td>{{ $entry->uraian_pekerjaan ?? '-' }}</td>
                     <td>{{ $entry->volume_pekerjaan ?? '-' }}</td>
                     <td class="text-center fw-bold">{{ number_format($entry->persentase, 2) }}%</td>

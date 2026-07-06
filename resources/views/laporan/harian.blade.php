@@ -70,8 +70,8 @@
                     <tr class="text-nowrap fs-7">
                         <td class="fw-semibold text-dark">{{ $entry->tanggal_pelaksanaan->format('d M Y') }}</td>
                         <td class="fw-semibold text-primary">
-                            {{ $entry->proyek->nama_proyek }}
-                            <div class="text-muted fs-8 fw-normal">[{{ $entry->proyek->kode_proyek }}]</div>
+                            {{ $entry->proyek?->nama_proyek ?? 'Proyek Terhapus' }}
+                            <div class="text-muted fs-8 fw-normal">[{{ $entry->proyek?->kode_proyek ?? '-' }}]</div>
                         </td>
                         <td class="text-dark text-wrap" style="max-width: 250px;">{{ $entry->uraian_pekerjaan ?? '-' }}</td>
                         <td class="text-dark">{{ $entry->volume_pekerjaan ?? '-' }}</td>

@@ -131,7 +131,7 @@
             @forelse($reportData as $entry)
                 <tr>
                     <td style="white-space: nowrap;">Minggu ke-{{ $entry->minggu_ke }} ({{ $entry->tahun }})</td>
-                    <td class="fw-bold">{{ $entry->proyek->nama_proyek }}</td>
+                    <td class="fw-bold">{{ $entry->proyek?->nama_proyek ?? 'Proyek Terhapus' }}</td>
                     <td>{{ number_format($entry->progress_sebelumnya, 2) }}%</td>
                     <td>{{ number_format($entry->progress_berjalan, 2) }}%</td>
                     <td class="fw-bold">{{ number_format($entry->persentase, 2) }}%</td>
