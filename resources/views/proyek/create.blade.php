@@ -111,6 +111,16 @@
                         <textarea name="keterangan" id="keterangan" rows="3" class="form-control fs-7 @error('keterangan') is-invalid @enderror" placeholder="Tulis keterangan tambahan mengenai proyek...">{{ old('keterangan') }}</textarea>
                     </div>
 
+                    <!-- Gambar Proyek -->
+                    <div class="col-12">
+                        <label for="gambar_proyek" class="form-label fs-7 fw-semibold text-dark">Gambar Proyek (Opsional)</label>
+                        <input type="file" name="gambar_proyek" id="gambar_proyek" class="form-control fs-7 @error('gambar_proyek') is-invalid @enderror" accept="image/*">
+                        <small class="text-muted d-block mt-1 fs-8">Unggah gambar utama proyek. Format: JPG, PNG, JPEG, WEBP (Maks. 2MB)</small>
+                        @error('gambar_proyek')
+                            <div class="invalid-feedback fs-8 mt-1">{{ $message }}</div>
+                        @enderror
+                    </div>
+
                     <!-- Foto Dokumentasi Awal -->
                     <div class="col-12">
                         <label for="foto" class="form-label fs-7 fw-semibold text-dark">Foto Dokumentasi Awal (Opsional)</label>

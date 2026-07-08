@@ -29,6 +29,7 @@ class Proyek extends Model
         'nilai_kontrak',
         'keterangan',
         'tahapan_pekerjaan',
+        'gambar_proyek',
     ];
 
     protected $casts = [
@@ -61,6 +62,66 @@ class Proyek extends Model
     public function dokumentasi(): HasMany
     {
         return $this->hasMany(Dokumentasi::class, 'proyek_id');
+    }
+
+    public function getGambarProyekUrlAttribute(): string
+    {
+        $gambarPath = $this->gambar_proyek;
+
+        // Fallback to first documentation if gambar_proyek is not set
+        if (!$gambarPath) {
+            $firstDokumentasi = $this->dokumentasi()->first();
+            if ($firstDokumentasi && $firstDokumentasi->file_path) {
+                $gambarPath = $firstDokumentasi->file_path;
+            }
+        }
+
+        if (!$gambarPath) {
+            return 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=500';
+        }
+
+        if (filter_var($gambarPath, FILTER_VALIDATE_URL)) {
+            return $gambarPath;
+        }
+
+        $disk = config('filesystems.default');
+        if ($disk === 'supabase') {
+            return \Illuminate\Support\Facades\Storage::disk('supabase')->url($gambarPath);
+        }
+
+        return asset('storage/' . $gambarPath);
+    }
+
+    public function getGambarProyekBase64Attribute(): string
+    {
+        $disk = config('filesystems.default');
+        $storage = \Illuminate\Support\Facades\Storage::disk($disk);
+        
+        $gambarPath = $this->gambar_proyek;
+
+        // Fallback to first documentation if gambar_proyek is not set
+        if (!$gambarPath) {
+            $firstDokumentasi = $this->dokumentasi()->first();
+            if ($firstDokumentasi && $firstDokumentasi->file_path) {
+                $gambarPath = $firstDokumentasi->file_path;
+            }
+        }
+
+        if ($gambarPath) {
+            if (filter_var($gambarPath, FILTER_VALIDATE_URL)) {
+                return $gambarPath;
+            } elseif ($storage->exists($gambarPath)) {
+                try {
+                    $data = $storage->get($gambarPath);
+                    $ext = pathinfo($gambarPath, PATHINFO_EXTENSION);
+                    return 'data:image/' . $ext . ';base64,' . base64_encode($data);
+                } catch (\Exception $e) {
+                    // Fallback
+                }
+            }
+        }
+        
+        return 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=100';
     }
 
     public function getActualProgressAttribute()

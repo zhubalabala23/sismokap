@@ -125,6 +125,7 @@
                 <th class="text-center" style="width: 65px;">BOBOT PEKERJAAN (AKUMULATIF)</th>
                 <th class="text-center" style="width: 65px;">PERSENTASE PENYELESAIAN</th>
                 <th class="text-center" style="width: 50px;">SELISIH TARGET</th>
+                <th class="text-center" style="width: 55px;">GAMBAR</th>
                 <th class="text-center" style="width: 60px;">STATUS</th>
             </tr>
         </thead>
@@ -146,12 +147,19 @@
                         {{ $item['selisih'] >= 0 ? '+' : '' }}{{ number_format($item['selisih'], 2) }}%
                     </td>
                     <td class="text-center">
+                        @if($item['gambar_proyek_base64'])
+                            <img src="{{ $item['gambar_proyek_base64'] }}" style="height: 30px; width: 45px; object-fit: cover; border: 0.5px solid #cbd5e0; border-radius: 2px;">
+                        @else
+                            <span style="color: #a0aec0; font-size: 7px;">-</span>
+                        @endif
+                    </td>
+                    <td class="text-center">
                         {{ strtoupper($item['status']) }}
                     </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="10" class="text-center" style="color: #a0aec0; font-style: italic;">Tidak ada data progress proyek ditemukan.</td>
+                    <td colspan="11" class="text-center" style="color: #a0aec0; font-style: italic;">Tidak ada data progress proyek ditemukan.</td>
                 </tr>
             @endforelse
         </tbody>

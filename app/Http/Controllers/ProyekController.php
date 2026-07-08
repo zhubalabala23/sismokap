@@ -67,6 +67,28 @@ class ProyekController extends Controller
         $validatedData['kontraktor_id'] = $kontraktor->id;
         unset($validatedData['pelaksana_nama']);
 
+        if ($request->hasFile('gambar_proyek')) {
+            $disk = config('filesystems.default');
+            $file = $request->file('gambar_proyek');
+            $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+            $image = $manager->read($file->getRealPath());
+
+            if ($image->width() > 1200) {
+                $image->scale(width: 1200);
+            }
+
+            $mime = $file->getClientMimeType();
+            if (str_contains($mime, 'png')) {
+                $encoded = $image->toPng();
+            } else {
+                $encoded = $image->toJpg(75);
+            }
+
+            $path = 'proyek/' . $file->hashName();
+            \Illuminate\Support\Facades\Storage::disk($disk)->put($path, (string) $encoded);
+            $validatedData['gambar_proyek'] = $path;
+        }
+
         $proyek = Proyek::create($validatedData);
 
         if ($request->hasFile('foto')) {
@@ -160,6 +182,34 @@ class ProyekController extends Controller
         }
         unset($validatedData['pelaksana_nama']);
 
+        if ($request->hasFile('gambar_proyek')) {
+            $disk = config('filesystems.default');
+            
+            // Hapus gambar lama jika ada
+            if ($proyek->gambar_proyek && \Illuminate\Support\Facades\Storage::disk($disk)->exists($proyek->gambar_proyek)) {
+                \Illuminate\Support\Facades\Storage::disk($disk)->delete($proyek->gambar_proyek);
+            }
+
+            $file = $request->file('gambar_proyek');
+            $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+            $image = $manager->read($file->getRealPath());
+
+            if ($image->width() > 1200) {
+                $image->scale(width: 1200);
+            }
+
+            $mime = $file->getClientMimeType();
+            if (str_contains($mime, 'png')) {
+                $encoded = $image->toPng();
+            } else {
+                $encoded = $image->toJpg(75);
+            }
+
+            $path = 'proyek/' . $file->hashName();
+            \Illuminate\Support\Facades\Storage::disk($disk)->put($path, (string) $encoded);
+            $validatedData['gambar_proyek'] = $path;
+        }
+
         $proyek->update($validatedData);
 
         // Handle image upload / edit
@@ -207,6 +257,10 @@ class ProyekController extends Controller
         try {
             // Hapus berkas foto dari storage (lokal atau Supabase) sebelum menghapus data proyek
             $disk = config('filesystems.default');
+            if ($proyek->gambar_proyek && \Illuminate\Support\Facades\Storage::disk($disk)->exists($proyek->gambar_proyek)) {
+                \Illuminate\Support\Facades\Storage::disk($disk)->delete($proyek->gambar_proyek);
+            }
+
             foreach ($proyek->dokumentasi as $foto) {
                 if ($foto->file_path && \Illuminate\Support\Facades\Storage::disk($disk)->exists($foto->file_path)) {
                     \Illuminate\Support\Facades\Storage::disk($disk)->delete($foto->file_path);

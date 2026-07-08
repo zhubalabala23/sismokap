@@ -67,6 +67,7 @@
                     <th scope="col" class="text-center" style="width: 130px;">AKUMULASI PROGRES</th>
                     <th scope="col" class="text-center" style="width: 100px;">TARGET</th>
                     <th scope="col" class="text-center" style="width: 100px;">SELISIH</th>
+                    <th scope="col" class="text-center" style="width: 100px;">GAMBAR PROYEK</th>
                     <th scope="col" class="text-center">STATUS</th>
                 </tr>
             </thead>
@@ -85,6 +86,13 @@
                             {{ $item['selisih'] >= 0 ? '+' : '' }}{{ number_format($item['selisih'], 2) }}%
                         </td>
                         <td class="text-center">
+                            @if($item['gambar_proyek_url'])
+                                <img src="{{ $item['gambar_proyek_url'] }}" alt="Proyek" class="rounded border" style="height: 40px; width: 60px; object-fit: cover;">
+                            @else
+                                <span class="text-muted fs-8">-</span>
+                            @endif
+                        </td>
+                        <td class="text-center">
                             @if($item['status'] === 'berjalan')
                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 fs-8">BERJALAN</span>
                             @elseif($item['status'] === 'selesai')
@@ -96,7 +104,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="10" class="text-center text-muted py-4 fs-7">Tidak ada data progress proyek pada bulan ini.</td>
+                        <td colspan="11" class="text-center text-muted py-4 fs-7">Tidak ada data progress proyek pada bulan ini.</td>
                     </tr>
                 @endforelse
             </tbody>

@@ -124,6 +124,7 @@
                 <th style="width: 60px;">SELISIH</th>
                 <th>KENDALA</th>
                 <th>RENCANA DEPAN</th>
+                <th style="width: 50px;">GAMBAR</th>
                 <th>KETERANGAN</th>
             </tr>
         </thead>
@@ -141,11 +142,18 @@
                     </td>
                     <td>{{ $entry->kendala ?? '-' }}</td>
                     <td>{{ $entry->rencana_berikutnya ?? '-' }}</td>
+                    <td>
+                        @if($entry->proyek?->gambar_proyek_base64)
+                            <img src="{{ $entry->proyek->gambar_proyek_base64 }}" style="height: 30px; width: 45px; object-fit: cover; border: 0.5px solid #cbd5e0; border-radius: 2px;">
+                        @else
+                            <span style="color: #a0aec0; font-size: 7px;">-</span>
+                        @endif
+                    </td>
                     <td>{{ $entry->keterangan ?? '-' }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="10" class="text-center" style="color: #a0aec0; font-style: italic;">Tidak ada data progress mingguan ditemukan.</td>
+                    <td colspan="11" class="text-center" style="color: #a0aec0; font-style: italic;">Tidak ada data progress mingguan ditemukan.</td>
                 </tr>
             @endforelse
         </tbody>

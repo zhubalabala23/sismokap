@@ -73,6 +73,7 @@
                     <th scope="col" class="text-center" style="width: 130px;">BOBOT PEKERJAAN (AKUMULATIF)</th>
                     <th scope="col" class="text-center" style="width: 130px;">PERSENTASE PENYELESAIAN</th>
                     <th scope="col" class="text-center" style="width: 120px;">SELISIH TARGET</th>
+                    <th scope="col" class="text-center" style="width: 100px;">GAMBAR PROYEK</th>
                     <th scope="col" class="text-center" style="width: 130px;">STATUS PROYEK</th>
                 </tr>
             </thead>
@@ -102,6 +103,13 @@
                             {{ $item['selisih'] > 0 ? '+' : '' }}{{ number_format($item['selisih'], 2) }}%
                         </td>
                         <td class="text-center">
+                            @if($item['gambar_proyek_url'])
+                                <img src="{{ $item['gambar_proyek_url'] }}" alt="Proyek" class="rounded border" style="height: 40px; width: 60px; object-fit: cover;">
+                            @else
+                                <span class="text-muted fs-8">-</span>
+                            @endif
+                        </td>
+                        <td class="text-center">
                             @if($item['status'] === 'perencanaan')
                                 <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1 fs-8">PERENCANAAN</span>
                             @elseif($item['status'] === 'berjalan')
@@ -115,7 +123,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="10" class="text-center text-muted py-4 fs-7">Tidak ada data progress ditemukan.</td>
+                        <td colspan="11" class="text-center text-muted py-4 fs-7">Tidak ada data progress ditemukan.</td>
                     </tr>
                 @endforelse
             </tbody>

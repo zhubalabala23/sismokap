@@ -188,6 +188,7 @@ class LaporanController extends Controller
                 'target' => $target,
                 'selisih' => $selisih,
                 'status' => $proyek->status,
+                'gambar_proyek_url' => $proyek->gambar_proyek_url,
             ];
         })->filter()->values();
 
@@ -290,6 +291,7 @@ class LaporanController extends Controller
                 'target' => $target,
                 'selisih' => $selisih,
                 'status' => $proyek->status,
+                'gambar_proyek_base64' => $proyek->gambar_proyek_base64,
             ];
         })->filter()->values();
 
@@ -357,6 +359,7 @@ class LaporanController extends Controller
                 'target' => $target,
                 'selisih' => $selisih,
                 'status' => $proyek->status,
+                'gambar_proyek_url' => $proyek->gambar_proyek_url,
             ];
         });
 
@@ -418,6 +421,7 @@ class LaporanController extends Controller
                 'target' => $target,
                 'selisih' => $selisih,
                 'status' => $proyek->status,
+                'gambar_proyek_base64' => $proyek->gambar_proyek_base64,
             ];
         });
 

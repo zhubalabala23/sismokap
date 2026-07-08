@@ -33,6 +33,7 @@ class UpdateProyekRequest extends FormRequest
             'keterangan' => 'nullable|string',
             'tahapan_pekerjaan' => 'required|string|max:255',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'gambar_proyek' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ];
     }
 
@@ -62,6 +63,9 @@ class UpdateProyekRequest extends FormRequest
             'foto.image' => 'Foto harus berupa berkas gambar.',
             'foto.mimes' => 'Format foto harus berupa jpeg, png, jpg, atau webp.',
             'foto.max' => 'Ukuran foto tidak boleh melebihi 2MB.',
+            'gambar_proyek.image' => 'Gambar proyek harus berupa berkas gambar.',
+            'gambar_proyek.mimes' => 'Format gambar proyek harus berupa jpeg, png, jpg, atau webp.',
+            'gambar_proyek.max' => 'Ukuran gambar proyek tidak boleh melebihi 2MB.',
         ];
     }
 }

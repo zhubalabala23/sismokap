@@ -62,6 +62,7 @@
                     <th scope="col">PROGRES HARIAN</th>
                     <th scope="col">KENDALA</th>
                     <th scope="col">SOLUSI</th>
+                    <th scope="col">GAMBAR PROYEK</th>
                     <th scope="col">PETUGAS INPUT</th>
                 </tr>
             </thead>
@@ -79,11 +80,18 @@
                         <td class="fw-bold text-success">{{ number_format($entry->progres_harian, 2) }}%</td>
                         <td class="text-muted text-wrap" style="max-width: 150px;">{{ $entry->kendala ?? '-' }}</td>
                         <td class="text-muted text-wrap" style="max-width: 150px;">{{ $entry->solusi ?? '-' }}</td>
+                        <td>
+                            @if($entry->proyek?->gambar_proyek_url)
+                                <img src="{{ $entry->proyek->gambar_proyek_url }}" alt="Proyek" class="rounded border" style="height: 40px; width: 60px; object-fit: cover;">
+                            @else
+                                <span class="text-muted fs-8">-</span>
+                            @endif
+                        </td>
                         <td class="text-dark">{{ $entry->user->name ?? '-' }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9" class="text-center text-muted py-4 fs-7">Tidak ada data progress harian ditemukan.</td>
+                        <td colspan="10" class="text-center text-muted py-4 fs-7">Tidak ada data progress harian ditemukan.</td>
                     </tr>
                 @endforelse
             </tbody>

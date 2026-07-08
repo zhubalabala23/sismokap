@@ -63,6 +63,7 @@
                     <th scope="col">SELISIH</th>
                     <th scope="col">KENDALA</th>
                     <th scope="col">RENCANA DEPAN</th>
+                    <th scope="col">GAMBAR PROYEK</th>
                     <th scope="col">KETERANGAN</th>
                 </tr>
             </thead>
@@ -83,11 +84,18 @@
                         </td>
                         <td class="text-muted text-wrap" style="max-width: 150px;">{{ $entry->kendala ?? '-' }}</td>
                         <td class="text-muted text-wrap" style="max-width: 150px;">{{ $entry->rencana_berikutnya ?? '-' }}</td>
+                        <td>
+                            @if($entry->proyek?->gambar_proyek_url)
+                                <img src="{{ $entry->proyek->gambar_proyek_url }}" alt="Proyek" class="rounded border" style="height: 40px; width: 60px; object-fit: cover;">
+                            @else
+                                <span class="text-muted fs-8">-</span>
+                            @endif
+                        </td>
                         <td class="text-muted text-wrap" style="max-width: 150px;">{{ $entry->keterangan ?? '-' }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="10" class="text-center text-muted py-4 fs-7">Tidak ada data progress mingguan ditemukan.</td>
+                        <td colspan="11" class="text-center text-muted py-4 fs-7">Tidak ada data progress mingguan ditemukan.</td>
                     </tr>
                 @endforelse
             </tbody>

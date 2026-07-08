@@ -123,6 +123,7 @@
                 <th class="text-center" style="width: 60px;">PROGRES HARIAN</th>
                 <th>KENDALA</th>
                 <th>SOLUSI</th>
+                <th style="width: 50px;">GAMBAR</th>
                 <th style="width: 80px;">PETUGAS INPUT</th>
             </tr>
         </thead>
@@ -137,11 +138,18 @@
                     <td class="text-center fw-bold" style="color: #2b6cb0;">{{ number_format($entry->progres_harian, 2) }}%</td>
                     <td>{{ $entry->kendala ?? '-' }}</td>
                     <td>{{ $entry->solusi ?? '-' }}</td>
+                    <td>
+                        @if($entry->proyek?->gambar_proyek_base64)
+                            <img src="{{ $entry->proyek->gambar_proyek_base64 }}" style="height: 30px; width: 45px; object-fit: cover; border: 0.5px solid #cbd5e0; border-radius: 2px;">
+                        @else
+                            <span style="color: #a0aec0; font-size: 7px;">-</span>
+                        @endif
+                    </td>
                     <td>{{ $entry->user->name ?? '-' }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="9" class="text-center" style="color: #a0aec0; font-style: italic;">Tidak ada data progress harian ditemukan.</td>
+                    <td colspan="10" class="text-center" style="color: #a0aec0; font-style: italic;">Tidak ada data progress harian ditemukan.</td>
                 </tr>
             @endforelse
         </tbody>
